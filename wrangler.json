@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "gerenciador-sg-multimidia",
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "dab36417-9b9a-4d2c-8252-fc37162349c7",
+			"database_name": "sg-database"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
