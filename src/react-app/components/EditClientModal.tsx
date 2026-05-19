@@ -1,4 +1,4 @@
-import { X, Star, Instagram, Facebook, Save, Edit2, Mail, MapPin, Phone, Globe } from 'lucide-react';
+import { X, Star, Instagram, Facebook, Save, Edit2, Mail, MapPin, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import type { Client } from '@/shared/types';
@@ -11,7 +11,7 @@ interface EditClientModalProps {
   client: Client | null;
   onUpdate: (client: Client) => Promise<void>;
   loading: boolean;
-  formatCpfCnpj: (value: string, type: 'fisica' | 'juridica') => string;
+  _formatCpfCnpj?: (value: string, type: 'fisica' | 'juridica') => string;
 }
 
 export default function EditClientModal({
@@ -20,7 +20,7 @@ export default function EditClientModal({
   client,
   onUpdate,
   loading,
-  formatCpfCnpj
+  _formatCpfCnpj
 }: EditClientModalProps) {
   useLockBodyScroll(isOpen);
 
@@ -182,7 +182,7 @@ export default function EditClientModal({
                 <label className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700 cursor-pointer group hover:bg-slate-800 transition-colors">
                   <input
                     type="checkbox"
-                    checked={formData.is_favorite}
+                    checked={!!formData.is_favorite}
                     onChange={(e) => handleChange('is_favorite', e.target.checked)}
                     className="w-5 h-5 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500"
                   />
