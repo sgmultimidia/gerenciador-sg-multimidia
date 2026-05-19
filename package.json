@@ -1,5 +1,5 @@
 {
-  "name": "mocha-app",
+  "name": "gerenciador-sg-multimidia",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,12 +19,10 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.12.0",
     "@eslint/js": "9.25.1",
-    "@getmocha/vite-plugins": "^3.0.19",
-    "@getmocha/users-service": "^0.0.4",
     "@types/node": "22.14.1",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
-    "@vitejs/plugin-react": "4.4.1",
+    "@vitejs/plugin-react": "^4.5.0",
     "autoprefixer": "^10.4.21",
     "eslint": "9.25.1",
     "eslint-plugin-react-hooks": "5.2.0",
