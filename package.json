@@ -1,31 +1,47 @@
 {
-	"name": "gerenciador-sg-multimidia",
-	"description": "Cloudflare's native serverless SQL database.",
-	"cloudflare": {
-		"label": "Worker + D1 Database",
-		"products": [
-			"Workers",
-			"D1"
-		],
-		"categories": [
-			"storage"
-		],
-		"docs_url": "https://developers.cloudflare.com/d1/",
-		"preview_icon_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/6c63cca8-354a-4951-45a0-d58769ac6f00/public",
-		"preview_image_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/aa6158f1-7711-4485-f134-a8c802c0a800/preview",
-		"publish": true
-	},
-	"devDependencies": {
-		"typescript": "5.9.3",
-		"wrangler": "4.56.0"
-	},
-	"private": true,
-	"scripts": {
-		"cf-typegen": "wrangler types",
-		"check": "tsc && wrangler deploy --dry-run",
-		"deploy": "wrangler deploy",
-		"dev": "pnpm seedLocalD1 && wrangler dev",
-		"predeploy": "wrangler d1 migrations apply DB --remote",
-		"seedLocalD1": "wrangler d1 migrations apply DB --local"
-	}
+  "name": "mocha-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@hono/zod-validator": "^0.5.0",
+    "framer-motion": "^12.23.26",
+    "hono": "4.7.7",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "lucide-react": "^0.510.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-router": "^7.5.3",
+    "recharts": "^3.6.0",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.12.0",
+    "@eslint/js": "9.25.1",
+    "@getmocha/vite-plugins": "^3.0.19",
+    "@getmocha/users-service": "^0.0.4",
+    "@types/node": "22.14.1",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "@vitejs/plugin-react": "4.4.1",
+    "autoprefixer": "^10.4.21",
+    "eslint": "9.25.1",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.19",
+    "globals": "15.15.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.31.0",
+    "vite": "^7.1.3",
+    "wrangler": "^4.33.0"
+  },
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "cf-typegen": "wrangler types",
+    "check": "tsc && vite build && wrangler deploy --dry-run",
+    "dev": "vite",
+    "lint": "eslint ."
+  }
 }

@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color-scheme: dark;
+}
+
+/* Select dropdown styling */
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #1e293b !important;
+  color: white !important;
+  padding: 8px !important;
+}
+
+select option:checked {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+select option:hover {
+  background-color: #334155 !important;
+  color: white !important;
+}

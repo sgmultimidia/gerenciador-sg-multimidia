@@ -1,0 +1,32 @@
+{
+  "name": "SG Multimídia",
+  "short_name": "SG Multimídia",
+  "description": "Estúdio de produção audiovisual - Sistema de orçamentos e agendamentos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066FF",
+  "orientation": "portrait-primary",
+  "icons": [
+  {
+    "src": "https://019b3337-8e60-7d99-90b6-518278a74e7c.mochausercontent.com/logo-192.png",
+    "sizes": "192x192",
+    "type": "image/png",
+    "purpose": "any"
+  },
+  {
+    "src": "https://019b3337-8e60-7d99-90b6-518278a74e7c.mochausercontent.com/logo-512.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any"
+  },
+  {
+    "src": "https://019b3337-8e60-7d99-90b6-518278a74e7c.mochausercontent.com/logo-512-maskable.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "maskable"
+  }
+],
+  "categories": ["business", "productivity"],
+  "screenshots": []
+}
