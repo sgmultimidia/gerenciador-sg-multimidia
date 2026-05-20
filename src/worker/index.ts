@@ -1879,6 +1879,88 @@ app.get("/api/portal-links/project/:projectId", async (c) => {
 });
 
 // GET portal data by token (for client access)
+
+// ==================== PROSPECTS ====================
+
+// GET all prospects
+app.get("/api/prospects", async (c) => {
+  try {
+    const status = c.req.query("status");
+    let query = "SELECT * FROM prospects";
+    if (status) query += ` WHERE status = '${status}'`;
+    query += " ORDER BY created_at DESC";
+    const result = await c.env.DB.prepare(query).all();
+    return c.json(result.results || []);
+  } catch (error) {
+    return c.json({ error: "Failed to fetch prospects" }, 500);
+  }
+});
+
+// POST create prospect
+app.post("/api/prospects", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { name, whatsapp, business_type, visit_date, status, chosen_package, next_followup, notes } = body;
+    if (!name) return c.json({ error: "Nome obrigatório" }, 400);
+    const result = await c.env.DB.prepare(
+      "INSERT INTO prospects (name, whatsapp, business_type, visit_date, status, chosen_package, next_followup, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))"
+    ).bind(name, whatsapp || null, business_type || null, visit_date || null, status || 'visitado', chosen_package || null, next_followup || null, notes || null).run();
+    return c.json({ id: result.meta.last_row_id }, 201);
+  } catch (error) {
+    return c.json({ error: "Failed to create prospect" }, 500);
+  }
+});
+
+// PUT update prospect
+app.put("/api/prospects/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const body = await c.req.json();
+    const { name, whatsapp, business_type, visit_date, status, chosen_package, next_followup, notes } = body;
+    await c.env.DB.prepare(
+      "UPDATE prospects SET name=?, whatsapp=?, business_type=?, visit_date=?, status=?, chosen_package=?, next_followup=?, notes=?, updated_at=datetime('now') WHERE id=?"
+    ).bind(name, whatsapp || null, business_type || null, visit_date || null, status, chosen_package || null, next_followup || null, notes || null, id).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to update prospect" }, 500);
+  }
+});
+
+// POST convert prospect to client
+app.post("/api/prospects/:id/convert", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const prospect = await c.env.DB.prepare("SELECT * FROM prospects WHERE id = ?").bind(id).first() as any;
+    if (!prospect) return c.json({ error: "Prospect not found" }, 404);
+
+    // Create client
+    const clientResult = await c.env.DB.prepare(
+      "INSERT INTO clients (name, whatsapp, client_type, created_at, updated_at) VALUES (?, ?, 'fisica', datetime('now'), datetime('now'))"
+    ).bind(prospect.name, prospect.whatsapp || '').run();
+
+    const clientId = clientResult.meta.last_row_id;
+
+    // Update prospect
+    await c.env.DB.prepare(
+      "UPDATE prospects SET status='fechado', converted_client_id=?, updated_at=datetime('now') WHERE id=?"
+    ).bind(clientId, id).run();
+
+    return c.json({ success: true, client_id: clientId });
+  } catch (error) {
+    return c.json({ error: "Failed to convert prospect" }, 500);
+  }
+});
+
+// DELETE prospect
+app.delete("/api/prospects/:id", async (c) => {
+  try {
+    await c.env.DB.prepare("DELETE FROM prospects WHERE id = ?").bind(c.req.param("id")).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete prospect" }, 500);
+  }
+});
+
 app.get("/api/portal/:token", async (c) => {
   try {
     const token = c.req.param("token");
