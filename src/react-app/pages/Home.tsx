@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, DollarSign, Calendar, 
-  FileText, FolderKanban, Plus, Settings
+  FileText, FolderKanban, Plus, Settings, RefreshCw
 } from 'lucide-react';
 import type { Client, Service } from '@/shared/types';
 import { useToast } from '@/react-app/components/ToastContainer';
@@ -29,8 +29,8 @@ import ContractsManagement from '@/react-app/components/ContractsManagement';
 import ContractGenerator from '@/react-app/components/contracts/ContractGenerator';
 import ContractViewer from '@/react-app/components/contracts/ContractViewer';
 import ReceiptGeneratorModal from '@/react-app/components/ReceiptGeneratorModal';
+import RecurringProjects from '@/react-app/components/RecurringProjects';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
-import { formatBRL } from '@/react-app/utils/formatBRL';
 
 export default function HomeNew() {
   const toast = useToast();
@@ -51,6 +51,7 @@ export default function HomeNew() {
   const [showCashRegister, setShowCashRegister] = useState(false);
   const [showFinancialReports, setShowFinancialReports] = useState(false);
   const [showProjectStatus, setShowProjectStatus] = useState(false);
+  const [showRecurringProjects, setShowRecurringProjects] = useState(false);
   const [showMonthlyReceipt, setShowMonthlyReceipt] = useState(false);
   const [showWithdrawalControl, setShowWithdrawalControl] = useState(false);
   const [showQuoteWizard, setShowQuoteWizard] = useState(false);
@@ -336,22 +337,22 @@ export default function HomeNew() {
           message += `  • ${detail}\n`;
         });
       }
-      message += `  R$ ${formatBRL(item.price)}\n`;
+      message += `  R$ ${item.price.toFixed(2)}\n`;
       if (index < quote.items.length - 1) message += `\n`;
     });
     
     message += `\n*VALORES:*\n`;
-    message += `Subtotal: R$ ${formatBRL(quote.subtotal)}\n`;
+    message += `Subtotal: R$ ${quote.subtotal.toFixed(2)}\n`;
     
     // Show discount if there is any
     if (quote.discount_percentage > 0) {
       const discountValue = (quote.subtotal * quote.discount_percentage / 100);
-      message += `Desconto (${quote.discount_percentage}%): -R$ ${formatBRL(discountValue)}\n`;
+      message += `Desconto (${quote.discount_percentage}%): -R$ ${discountValue.toFixed(2)}\n`;
     } else if (quote.discount_value && quote.discount_value > 0) {
-      message += `Desconto: -R$ ${formatBRL(quote.discount_value)}\n`;
+      message += `Desconto: -R$ ${quote.discount_value.toFixed(2)}\n`;
     }
     
-    message += `\n*TOTAL: R$ ${formatBRL(quote.total)}*\n\n`;
+    message += `\n*TOTAL: R$ ${quote.total.toFixed(2)}*\n\n`;
     
     message += `Para aprovação ou dúvidas, entre em contato!\n\n`;
     message += `São Pedro do Sul - RS\n`;
@@ -393,7 +394,7 @@ export default function HomeNew() {
       message += `*SERVIÇOS À LA CARTE:*\n`;
       servicesList.forEach((service) => {
         message += `🎵 ${service.name}\n`;
-        message += `  R$ ${formatBRL(service.price)}`;
+        message += `  R$ ${service.price.toFixed(2)}`;
         if (service.is_hourly) message += `/hora`;
         if (service.is_per_track) message += `/faixa`;
         if (service.is_per_video) message += `/vídeo`;
@@ -409,7 +410,7 @@ export default function HomeNew() {
         if (combo.combo_items) {
           message += `${combo.combo_items}\n`;
         }
-        message += `  R$ ${formatBRL(combo.price)}`;
+        message += `  R$ ${combo.price.toFixed(2)}`;
         if (combo.is_per_track) message += `/faixa`;
         message += `\n\n`;
       });
@@ -611,6 +612,15 @@ export default function HomeNew() {
             >
               <span className="text-sm font-medium text-white">Gerenciar Projetos</span>
               <FolderKanban className="w-4 h-4 text-slate-400 group-hover:text-purple-400" />
+            </motion.button>
+            <motion.button
+              onClick={() => setShowRecurringProjects(true)}
+              className="w-full px-4 py-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg text-left transition-all border border-slate-600/50 hover:border-purple-500/50 flex items-center justify-between group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={tapScale}
+            >
+              <span className="text-sm font-medium text-white">Projetos Recorrentes</span>
+              <RefreshCw className="w-4 h-4 text-slate-400 group-hover:text-purple-400" />
             </motion.button>
           </div>
         </motion.div>
@@ -1188,6 +1198,11 @@ export default function HomeNew() {
         }}
         quote={selectedQuoteForReceipt}
         client={selectedClientForReceipt}
+      />
+      <RecurringProjects
+        isOpen={showRecurringProjects}
+        onClose={() => setShowRecurringProjects(false)}
+        clients={clients}
       />
     </AnimatedPage>
   );
