@@ -134,14 +134,22 @@ contracts.post('/generate', async (c) => {
     const dataLonga = `${hoje.getDate()} de ${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
 
     let content = (template as any).content;
+    const totalValue = Number((quote as any).total || 0);
+    const halfValue = totalValue / 2;
+    const formatBRL = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const clientType = (quote as any).client_type || 'fisica';
+    const clientTypeLabel = clientType === 'juridica' ? 'inscrita no CNPJ' : 'inscrito(a) no CPF';
+
     const replacements: Record<string, string> = {
       '{{client_name}}': (quote as any).client_name || '',
       '{{client_cpf_cnpj}}': (quote as any).cpf_cnpj || 'Não informado',
+      '{{client_type_label}}': clientTypeLabel,
       '{{client_address}}': (quote as any).address || 'Não informado',
       '{{client_email}}': (quote as any).email || 'Não informado',
       '{{client_whatsapp}}': (quote as any).whatsapp || '',
       '{{services_list}}': servicesList,
-      '{{total_value}}': Number((quote as any).total || 0).toFixed(2),
+      '{{total_value}}': formatBRL(totalValue),
+      '{{half_value}}': formatBRL(halfValue),
       '{{payment_terms}}': paymentTerms,
       '{{start_date}}': startDateBr,
       '{{contract_date}}': new Date().toLocaleDateString('pt-BR'),
