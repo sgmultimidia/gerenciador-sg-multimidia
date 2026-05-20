@@ -11,7 +11,7 @@ interface EditClientModalProps {
   client: Client | null;
   onUpdate: (client: Client) => Promise<void>;
   loading: boolean;
-  _formatCpfCnpj?: (value: string, type: 'fisica' | 'juridica') => string;
+  formatCpfCnpj: (value: string, type: 'fisica' | 'juridica') => string;
 }
 
 export default function EditClientModal({
@@ -20,7 +20,7 @@ export default function EditClientModal({
   client,
   onUpdate,
   loading,
-  _formatCpfCnpj
+  formatCpfCnpj
 }: EditClientModalProps) {
   useLockBodyScroll(isOpen);
 
