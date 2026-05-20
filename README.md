@@ -60,3 +60,4 @@ A live public deployment of this template is available at [https://d1-template.t
    ```bash
    npx wrangler deploy
    ```
+   
