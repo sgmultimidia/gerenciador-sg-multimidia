@@ -91,8 +91,7 @@ export default function HomeNew() {
   
 
   useEffect(() => {
-    loadClients();
-    loadServices();
+    Promise.all([loadClients(), loadServices()]);
   }, []);
 
   useEffect(() => {
