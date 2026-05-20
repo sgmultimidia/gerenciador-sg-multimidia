@@ -30,6 +30,7 @@ import ContractGenerator from '@/react-app/components/contracts/ContractGenerato
 import ContractViewer from '@/react-app/components/contracts/ContractViewer';
 import ReceiptGeneratorModal from '@/react-app/components/ReceiptGeneratorModal';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 export default function HomeNew() {
   const toast = useToast();
@@ -335,22 +336,22 @@ export default function HomeNew() {
           message += `  • ${detail}\n`;
         });
       }
-      message += `  R$ ${item.price.toFixed(2)}\n`;
+      message += `  R$ ${formatBRL(item.price)}\n`;
       if (index < quote.items.length - 1) message += `\n`;
     });
     
     message += `\n*VALORES:*\n`;
-    message += `Subtotal: R$ ${quote.subtotal.toFixed(2)}\n`;
+    message += `Subtotal: R$ ${formatBRL(quote.subtotal)}\n`;
     
     // Show discount if there is any
     if (quote.discount_percentage > 0) {
       const discountValue = (quote.subtotal * quote.discount_percentage / 100);
-      message += `Desconto (${quote.discount_percentage}%): -R$ ${discountValue.toFixed(2)}\n`;
+      message += `Desconto (${quote.discount_percentage}%): -R$ ${formatBRL(discountValue)}\n`;
     } else if (quote.discount_value && quote.discount_value > 0) {
-      message += `Desconto: -R$ ${quote.discount_value.toFixed(2)}\n`;
+      message += `Desconto: -R$ ${formatBRL(quote.discount_value)}\n`;
     }
     
-    message += `\n*TOTAL: R$ ${quote.total.toFixed(2)}*\n\n`;
+    message += `\n*TOTAL: R$ ${formatBRL(quote.total)}*\n\n`;
     
     message += `Para aprovação ou dúvidas, entre em contato!\n\n`;
     message += `São Pedro do Sul - RS\n`;
@@ -392,7 +393,7 @@ export default function HomeNew() {
       message += `*SERVIÇOS À LA CARTE:*\n`;
       servicesList.forEach((service) => {
         message += `🎵 ${service.name}\n`;
-        message += `  R$ ${service.price.toFixed(2)}`;
+        message += `  R$ ${formatBRL(service.price)}`;
         if (service.is_hourly) message += `/hora`;
         if (service.is_per_track) message += `/faixa`;
         if (service.is_per_video) message += `/vídeo`;
@@ -408,7 +409,7 @@ export default function HomeNew() {
         if (combo.combo_items) {
           message += `${combo.combo_items}\n`;
         }
-        message += `  R$ ${combo.price.toFixed(2)}`;
+        message += `  R$ ${formatBRL(combo.price)}`;
         if (combo.is_per_track) message += `/faixa`;
         message += `\n\n`;
       });
