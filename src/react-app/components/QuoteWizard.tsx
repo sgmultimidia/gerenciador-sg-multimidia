@@ -5,7 +5,8 @@ import { useToast } from '@/react-app/components/ToastContainer';
 import { Input, Textarea, NumberInput } from '@/react-app/components/ui';
 import { useIsMobile } from '@/react-app/hooks/useMediaQuery';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
-import { formatBRL } from '@/react-app/utils/formatBRL'; // v2
+import { formatBRL } from '@/react-app/utils/formatBRL';
+const _v = '2.0';
 
 interface QuoteWizardProps {
   isOpen: boolean;
