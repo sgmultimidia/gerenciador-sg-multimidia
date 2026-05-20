@@ -962,12 +962,6 @@ export default function ProjectStatus({ isOpen, onClose, clients }: ProjectStatu
         </div>
       )}
 
-      {/* Recurring Projects Modal */}
-      <RecurringProjects
-        isOpen={false}
-        onClose={() => {}}
-        clients={clients}
-      />
     </div>
   );
 }
