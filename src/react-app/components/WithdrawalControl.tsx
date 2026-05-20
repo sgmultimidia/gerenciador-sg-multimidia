@@ -4,6 +4,7 @@ import type { Withdrawal, WithdrawalSettings } from '../../shared/types';
 import { useToast } from './ToastContainer';
 import { useConfirm } from './ConfirmDialog';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 export function WithdrawalControl() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
@@ -141,7 +142,7 @@ export function WithdrawalControl() {
     if (withdrawalAmount > availableAmount) {
       const proceed = await confirm({
         title: 'Retirada acima do recomendado',
-        message: `Você está retirando R$ ${withdrawalAmount.toFixed(2)}, mas o valor recomendado disponível é R$ ${availableAmount.toFixed(2)}. Deseja continuar?`,
+        message: `Você está retirando R$ ${formatBRL(withdrawalAmount)}, mas o valor recomendado disponível é R$ ${formatBRL(availableAmount)}. Deseja continuar?`,
         type: 'warning',
         confirmText: 'Continuar',
         cancelText: 'Cancelar'
@@ -208,7 +209,7 @@ export function WithdrawalControl() {
     const headers = ['Data', 'Valor', 'Observações'];
     const rows = withdrawals.map(w => [
       new Date(w.withdrawal_date).toLocaleDateString('pt-BR'),
-      `R$ ${w.amount.toFixed(2)}`,
+      `R$ ${formatBRL(w.amount)}`,
       w.notes || ''
     ]);
 
@@ -273,7 +274,7 @@ export function WithdrawalControl() {
             <span className="text-[10px] opacity-90 leading-tight">Faturamento</span>
             <TrendingUp className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {monthlyRevenue.toFixed(2)}</p>
+          <p className="text-base font-bold">R$ {formatBRL(monthlyRevenue)}</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3 text-white">
@@ -281,7 +282,7 @@ export function WithdrawalControl() {
             <span className="text-[10px] opacity-90 leading-tight">Recomendado</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {recommendedAmount.toFixed(2)}</p>
+          <p className="text-base font-bold">R$ {formatBRL(recommendedAmount)}</p>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-3 text-white">
@@ -289,7 +290,7 @@ export function WithdrawalControl() {
             <span className="text-[10px] opacity-90 leading-tight">Disponível</span>
             <TrendingDown className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {Math.max(0, availableAmount).toFixed(2)}</p>
+          <p className="text-base font-bold">R$ {formatBRL(Math.max(0, availableAmount))}</p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3 text-white">
@@ -297,7 +298,7 @@ export function WithdrawalControl() {
             <span className="text-[10px] opacity-90 leading-tight">Retirado</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {monthlyWithdrawn.toFixed(2)}</p>
+          <p className="text-base font-bold">R$ {formatBRL(monthlyWithdrawn)}</p>
           <p className="text-[9px] opacity-75 mt-0.5">{percentageWithdrawn.toFixed(1)}%</p>
         </div>
       </div>
@@ -306,7 +307,7 @@ export function WithdrawalControl() {
       {availableAmount < 0 && (
         <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-2">
           <p className="text-yellow-300 text-xs">
-            ⚠️ Retirado R$ {Math.abs(availableAmount).toFixed(2)} acima do recomendado
+            ⚠️ Retirado R$ {formatBRL(Math.abs(availableAmount))} acima do recomendado
           </p>
         </div>
       )}
@@ -354,7 +355,7 @@ export function WithdrawalControl() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-white">
-                        R$ {withdrawal.amount.toFixed(2)}
+                        R$ {formatBRL(withdrawal.amount)}
                       </span>
                       <span className="text-[10px] text-slate-400">
                         {new Date(withdrawal.withdrawal_date).toLocaleDateString('pt-BR')}
@@ -414,7 +415,7 @@ export function WithdrawalControl() {
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Disponível: R$ {Math.max(0, availableAmount).toFixed(2)}
+                    Disponível: R$ {formatBRL(Math.max(0, availableAmount))}
                   </p>
                 </div>
 
@@ -512,7 +513,7 @@ export function WithdrawalControl() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
                   <p className="text-xs text-blue-800">
-                    Com {newPercentage}%: até <strong>R$ {((monthlyRevenue * parseFloat(newPercentage || '0')) / 100).toFixed(2)}</strong> este mês
+                    Com {newPercentage}%: até <strong>R$ {formatBRL(((monthlyRevenue * parseFloat(newPercentage || '0')) / 100))}</strong> este mês
                   </p>
                 </div>
               </div>

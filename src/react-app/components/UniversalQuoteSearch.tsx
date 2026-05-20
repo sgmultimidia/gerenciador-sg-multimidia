@@ -2,6 +2,7 @@ import { X, Search, Trash2, CheckCircle, Send, Download, Receipt, FileText } fro
 import type { Quote } from '@/shared/types';
 import { useIsMobile } from '@/react-app/hooks/useMediaQuery';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface UniversalQuoteSearchProps {
   isOpen: boolean;
@@ -144,7 +145,7 @@ export default function UniversalQuoteSearch({
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-cyan-400 font-bold text-2xl whitespace-nowrap">R$ {quote.total.toFixed(2)}</p>
+                      <p className="text-cyan-400 font-bold text-2xl whitespace-nowrap">R$ {formatBRL(quote.total)}</p>
                       {quote.discount_percentage > 0 && (
                         <p className="text-slate-400 text-sm">Desconto: {quote.discount_percentage}%</p>
                       )}
@@ -178,9 +179,9 @@ export default function UniversalQuoteSearch({
                             )}
                           </div>
                           <div className="text-right ml-4 flex-shrink-0">
-                            <p className="text-white font-semibold whitespace-nowrap">R$ {item.price.toFixed(2)}</p>
+                            <p className="text-white font-semibold whitespace-nowrap">R$ {formatBRL(item.price)}</p>
                             {item.displacement && item.displacement > 0 && (
-                              <p className="text-slate-400 text-xs">+ R$ {item.displacement.toFixed(2)}</p>
+                              <p className="text-slate-400 text-xs">+ R$ {formatBRL(item.displacement)}</p>
                             )}
                           </div>
                         </div>
@@ -191,19 +192,19 @@ export default function UniversalQuoteSearch({
                   <div className="border-t border-slate-600 pt-4 mt-4">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-400">Subtotal:</span>
-                      <span className="text-white font-semibold">R$ {quote.subtotal.toFixed(2)}</span>
+                      <span className="text-white font-semibold">R$ {formatBRL(quote.subtotal)}</span>
                     </div>
                     {quote.discount_percentage > 0 && (
                       <div className="flex justify-between items-center text-sm mt-1">
                         <span className="text-cyan-400">Desconto ({quote.discount_percentage}%):</span>
                         <span className="text-cyan-400 font-semibold">
-                          -R$ {((quote.subtotal * quote.discount_percentage) / 100).toFixed(2)}
+                          -R$ {formatBRL(((quote.subtotal * quote.discount_percentage) / 100))}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-lg font-bold mt-2 pt-2 border-t border-slate-600">
                       <span className="text-white">Total:</span>
-                      <span className="text-cyan-400">R$ {quote.total.toFixed(2)}</span>
+                      <span className="text-cyan-400">R$ {formatBRL(quote.total)}</span>
                     </div>
                   </div>
 

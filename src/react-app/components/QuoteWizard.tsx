@@ -5,6 +5,7 @@ import { useToast } from '@/react-app/components/ToastContainer';
 import { Input, Textarea, NumberInput } from '@/react-app/components/ui';
 import { useIsMobile } from '@/react-app/hooks/useMediaQuery';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface QuoteWizardProps {
   isOpen: boolean;
@@ -407,7 +408,7 @@ export default function QuoteWizard({
                                 <p className="text-slate-400 text-xs mt-0.5 truncate">{service.description}</p>
                               )}
                               <p className="text-blue-400 font-bold text-base mt-1">
-                                R$ {service.price.toFixed(2)}
+                                R$ {formatBRL(service.price)}
                                 <span className="text-xs text-slate-400 ml-1">
                                   {service.is_hourly ? '/hora' : ''}
                                   {service.is_per_track ? '/faixa' : ''}
@@ -496,7 +497,7 @@ export default function QuoteWizard({
                                 <p className="text-slate-400 text-xs mt-0.5 truncate">{combo.description}</p>
                               )}
                               <p className="text-purple-400 font-bold text-base mt-1">
-                                R$ {combo.price.toFixed(2)}
+                                R$ {formatBRL(combo.price)}
                                 <span className="text-xs text-slate-400 ml-1">
                                   {combo.is_per_track ? '/faixa' : ''}
                                 </span>
@@ -572,7 +573,7 @@ export default function QuoteWizard({
                                   </p>
                                 )}
                                 <p className="text-blue-400 font-semibold mt-1 whitespace-nowrap">
-                                  R$ {item.price.toFixed(2)}
+                                  R$ {formatBRL(item.price)}
                                 </p>
                               </div>
                               <button
@@ -590,7 +591,7 @@ export default function QuoteWizard({
                     <div className="mt-4 pt-4 border-t border-slate-600">
                       <div className="flex justify-between text-white font-bold text-lg">
                         <span>Subtotal:</span>
-                        <span>R$ {subtotal.toFixed(2)}</span>
+                        <span>R$ {formatBRL(subtotal)}</span>
                       </div>
                     </div>
                   </div>
@@ -671,7 +672,7 @@ export default function QuoteWizard({
                   {discountValue > 0 && (
                     <div className="mt-3 p-3 bg-green-600/20 border border-green-500/30 rounded-lg">
                       <p className="text-green-300 text-sm font-semibold">
-                        Desconto aplicado: R$ {discountValue.toFixed(2)}
+                        Desconto aplicado: R$ {formatBRL(discountValue)}
                         {discountType === 'percentage' && ` (${discountPercentage}%)`}
                       </p>
                     </div>
@@ -733,7 +734,7 @@ export default function QuoteWizard({
                             </p>
                           )}
                         </div>
-                        <p className="text-blue-400 font-semibold whitespace-nowrap flex-shrink-0">R$ {item.price.toFixed(2)}</p>
+                        <p className="text-blue-400 font-semibold whitespace-nowrap flex-shrink-0">R$ {formatBRL(item.price)}</p>
                       </div>
                     ))}
                   </div>
@@ -745,7 +746,7 @@ export default function QuoteWizard({
                   <div className="space-y-2">
                     <div className="flex justify-between text-slate-300">
                       <span>Subtotal</span>
-                      <span>R$ {subtotal.toFixed(2)}</span>
+                      <span>R$ {formatBRL(subtotal)}</span>
                     </div>
                     {discountValue > 0 && (
                       <div className="flex justify-between text-green-400">
@@ -754,13 +755,13 @@ export default function QuoteWizard({
                           {discountType === 'percentage' && ` (${discountPercentage}%)`}
                           {discountType === 'fixed' && ' (Valor Fixo)'}
                         </span>
-                        <span>- R$ {discountValue.toFixed(2)}</span>
+                        <span>- R$ {formatBRL(discountValue)}</span>
                       </div>
                     )}
                     <div className="h-px bg-slate-600 my-2"></div>
                     <div className="flex justify-between text-white font-bold text-xl">
                       <span>Total</span>
-                      <span>R$ {total.toFixed(2)}</span>
+                      <span>R$ {formatBRL(total)}</span>
                     </div>
                   </div>
                 </div>

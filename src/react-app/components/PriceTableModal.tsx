@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, DollarSign, Send, Edit2, Check, XCircle } from 'lucide-react';
 import type { Service } from '@/shared/types';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface PriceTableModalProps {
   isOpen: boolean;
@@ -136,7 +137,7 @@ export default function PriceTableModal({
                             </div>
                           ) : (
                             <p className="text-blue-400 font-bold text-xl">
-                              R$ {service.price.toFixed(2)}
+                              R$ {formatBRL(service.price)}
                             </p>
                           )}
                           {!isEditing && (
@@ -247,7 +248,7 @@ export default function PriceTableModal({
                               </div>
                             ) : (
                               <p className="text-cyan-400 font-bold text-2xl">
-                                R$ {combo.price.toFixed(2)}
+                                R$ {formatBRL(combo.price)}
                               </p>
                             )}
                             {combo.is_per_track === 1 && !isEditing && (

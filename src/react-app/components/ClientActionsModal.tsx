@@ -5,6 +5,7 @@ import type { Client, Quote, MonthlyReceipt } from '@/shared/types';
 import QuoteDetailsModal from './QuoteDetailsModal';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
 import { backdropVariants, modalVariants } from '@/react-app/utils/animations';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface ClientActionsModalProps {
   isOpen: boolean;
@@ -313,7 +314,7 @@ export default function ClientActionsModal({
                   <h4 className="text-lg font-bold text-white mb-3">📊 Resumo</h4>
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <p className="text-2xl font-bold text-green-400">R$ {stats.totalSpent.toFixed(2)}</p>
+                      <p className="text-2xl font-bold text-green-400">R$ {formatBRL(stats.totalSpent)}</p>
                       <p className="text-slate-400 text-xs">Total Gasto</p>
                     </div>
                     <div>
@@ -340,7 +341,7 @@ export default function ClientActionsModal({
                         <span className="text-white truncate">{service.name}</span>
                         <div className="flex gap-3 text-slate-300 flex-shrink-0 ml-2">
                           <span>{service.count}x</span>
-                          <span className="text-green-400 font-semibold">R$ {service.total.toFixed(2)}</span>
+                          <span className="text-green-400 font-semibold">R$ {formatBRL(service.total)}</span>
                         </div>
                       </div>
                     ))}
@@ -371,7 +372,7 @@ export default function ClientActionsModal({
                             <span className="text-slate-400 ml-2">{new Date(quote.created_at).toLocaleDateString('pt-BR')}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-green-400 font-semibold">R$ {quote.total.toFixed(2)}</span>
+                            <span className="text-green-400 font-semibold">R$ {formatBRL(quote.total)}</span>
                             <span className={`text-xs px-2 py-0.5 rounded ${
                               quote.status === 'approved' ? 'bg-green-600' : 'bg-yellow-600'
                             } text-white`}>
@@ -401,7 +402,7 @@ export default function ClientActionsModal({
                             <p className="text-white font-semibold truncate">{receipt.description}</p>
                             <p className="text-slate-400 text-xs">{receipt.month_reference}</p>
                           </div>
-                          <span className="text-green-400 font-semibold ml-2 flex-shrink-0">R$ {receipt.amount.toFixed(2)}</span>
+                          <span className="text-green-400 font-semibold ml-2 flex-shrink-0">R$ {formatBRL(receipt.amount)}</span>
                         </div>
                         
                         {onMonthlyReceiptPDF && (

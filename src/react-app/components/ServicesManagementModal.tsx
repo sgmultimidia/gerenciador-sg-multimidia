@@ -5,6 +5,7 @@ import { useToast } from '@/react-app/components/ToastContainer';
 import { useConfirm } from '@/react-app/components/ConfirmDialog';
 import { useIsMobile } from '@/react-app/hooks/useMediaQuery';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface ServicesManagementModalProps {
   isOpen: boolean;
@@ -521,7 +522,7 @@ export default function ServicesManagementModal({
                       </div>
                       
                       <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <p className="text-green-400 font-bold text-xl">R$ {service.price.toFixed(2)}</p>
+                        <p className="text-green-400 font-bold text-xl">R$ {formatBRL(service.price)}</p>
                         {service.is_hourly === 1 && (
                           <span className="text-xs px-2.5 py-1 bg-purple-600/20 border border-purple-500 text-purple-300 rounded-md font-semibold">
                             POR HORA

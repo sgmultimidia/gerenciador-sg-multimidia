@@ -5,6 +5,7 @@ import { useToast } from '@/react-app/components/ToastContainer';
 import { useConfirm } from '@/react-app/components/ConfirmDialog';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
 import { Select } from './ui';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface CashRegisterProps {
   isOpen: boolean;
@@ -274,7 +275,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
                   <span className="text-green-300 text-sm font-semibold uppercase tracking-wide">Entradas</span>
                   <TrendingUp className="w-5 h-5 text-green-400" />
                 </div>
-                <p className="text-3xl font-bold text-green-400">R$ {balance.income.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-green-400">R$ {formatBRL(balance.income)}</p>
               </div>
 
               <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 rounded-lg p-4">
@@ -282,7 +283,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
                   <span className="text-red-300 text-sm font-semibold uppercase tracking-wide">Saídas</span>
                   <TrendingDown className="w-5 h-5 text-red-400" />
                 </div>
-                <p className="text-3xl font-bold text-red-400">R$ {balance.expense.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-red-400">R$ {formatBRL(balance.expense)}</p>
               </div>
 
               <div className={`bg-gradient-to-br ${balance.balance >= 0 ? 'from-blue-500/20 to-blue-600/10 border-blue-500/30' : 'from-orange-500/20 to-orange-600/10 border-orange-500/30'} border rounded-lg p-4`}>
@@ -290,7 +291,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
                   <span className={`${balance.balance >= 0 ? 'text-blue-300' : 'text-orange-300'} text-sm font-semibold uppercase tracking-wide`}>Saldo</span>
                   <DollarSign className={`w-5 h-5 ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`} />
                 </div>
-                <p className={`text-3xl font-bold ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>R$ {balance.balance.toFixed(2)}</p>
+                <p className={`text-3xl font-bold ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>R$ {formatBRL(balance.balance)}</p>
               </div>
             </div>
           </div>
@@ -515,7 +516,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
                           <p className={`text-2xl font-bold whitespace-nowrap ${
                             transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
                           }`}>
-                            {transaction.type === 'income' ? '+' : '-'} R$ {transaction.amount.toFixed(2)}
+                            {transaction.type === 'income' ? '+' : '-'} R$ {formatBRL(transaction.amount)}
                           </p>
                         </div>
 

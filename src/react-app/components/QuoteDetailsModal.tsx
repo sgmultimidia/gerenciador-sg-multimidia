@@ -1,6 +1,7 @@
 import { X, CheckCircle, Send, Download, Receipt, FileText, Trash2, FileCheck, Calendar } from 'lucide-react';
 import type { Client, Quote, Receipt as ReceiptType } from '@/shared/types';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface QuoteDetailsModalProps {
   isOpen: boolean;
@@ -130,9 +131,9 @@ export default function QuoteDetailsModal({
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <p className="text-cyan-400 font-bold text-lg">R$ {item.price.toFixed(2)}</p>
+                      <p className="text-cyan-400 font-bold text-lg">R$ {formatBRL(item.price)}</p>
                       {item.displacement && item.displacement > 0 && (
-                        <p className="text-slate-400 text-xs">+ Deslocamento: R$ {item.displacement.toFixed(2)}</p>
+                        <p className="text-slate-400 text-xs">+ Deslocamento: R$ {formatBRL(item.displacement)}</p>
                       )}
                     </div>
                   </div>
@@ -150,24 +151,24 @@ export default function QuoteDetailsModal({
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-slate-300">Subtotal</span>
-                <span className="text-white font-semibold text-lg">R$ {quote.subtotal.toFixed(2)}</span>
+                <span className="text-white font-semibold text-lg">R$ {formatBRL(quote.subtotal)}</span>
               </div>
               {quote.discount_percentage > 0 && (
                 <div className="flex justify-between items-center">
                   <span className="text-green-400">Desconto ({quote.discount_percentage}%)</span>
-                  <span className="text-green-400 font-semibold">-R$ {(quote.subtotal * quote.discount_percentage / 100).toFixed(2)}</span>
+                  <span className="text-green-400 font-semibold">-R$ {formatBRL((quote.subtotal * quote.discount_percentage / 100))}</span>
                 </div>
               )}
               {quote.discount_value && quote.discount_value > 0 && (
                 <div className="flex justify-between items-center">
                   <span className="text-green-400">Desconto (Valor Fixo)</span>
-                  <span className="text-green-400 font-semibold">-R$ {quote.discount_value.toFixed(2)}</span>
+                  <span className="text-green-400 font-semibold">-R$ {formatBRL(quote.discount_value)}</span>
                 </div>
               )}
               <div className="h-px bg-slate-600 my-2"></div>
               <div className="flex justify-between items-center">
                 <span className="text-white font-bold text-xl">TOTAL</span>
-                <span className="text-cyan-400 font-bold text-3xl">R$ {quote.total.toFixed(2)}</span>
+                <span className="text-cyan-400 font-bold text-3xl">R$ {formatBRL(quote.total)}</span>
               </div>
             </div>
           </div>

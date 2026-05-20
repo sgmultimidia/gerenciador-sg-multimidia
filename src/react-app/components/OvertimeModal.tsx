@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface OvertimeModalProps {
   isOpen: boolean;
@@ -61,7 +62,7 @@ export default function OvertimeModal({
             {minutes && Number(minutes) > 0 && (
               <div className="mt-3 p-3 bg-blue-500/20 border border-blue-500/50 rounded-md">
                 <p className="text-blue-300 text-sm">
-                  <span className="font-semibold">Valor adicional:</span> R$ {((Number(minutes) * 250) / 60).toFixed(2)}
+                  <span className="font-semibold">Valor adicional:</span> R$ {formatBRL(((Number(minutes) * 250) / 60))}
                 </p>
               </div>
             )}

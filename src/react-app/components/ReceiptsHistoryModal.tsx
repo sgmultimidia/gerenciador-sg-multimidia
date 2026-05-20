@@ -2,6 +2,7 @@ import { X, FileCheck, Trash2 } from 'lucide-react';
 import type { Quote, Receipt } from '@/shared/types';
 import { useConfirm } from '@/react-app/components/ConfirmDialog';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
+import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface ReceiptsHistoryModalProps {
   isOpen: boolean;
@@ -88,7 +89,7 @@ export default function ReceiptsHistoryModal({
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="text-right">
-                        <p className="text-green-400 font-bold text-2xl">R$ {receipt.final_total.toFixed(2)}</p>
+                        <p className="text-green-400 font-bold text-2xl">R$ {formatBRL(receipt.final_total)}</p>
                       </div>
                       {onDelete && (
                         <button
@@ -112,7 +113,7 @@ export default function ReceiptsHistoryModal({
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-slate-300">Valor adicional:</span>
-                          <span className="text-white font-semibold">R$ {receipt.overtime_value.toFixed(2)}</span>
+                          <span className="text-white font-semibold">R$ {formatBRL(receipt.overtime_value)}</span>
                         </div>
                       </div>
                     </div>
@@ -121,17 +122,17 @@ export default function ReceiptsHistoryModal({
                   <div className="border-t border-slate-600 pt-4 mt-4">
                     <div className="flex justify-between items-center text-sm mb-2">
                       <span className="text-slate-400">Valor do orçamento:</span>
-                      <span className="text-white font-semibold">R$ {quote.total.toFixed(2)}</span>
+                      <span className="text-white font-semibold">R$ {formatBRL(quote.total)}</span>
                     </div>
                     {receipt.overtime_value > 0 && (
                       <div className="flex justify-between items-center text-sm mb-2">
                         <span className="text-green-400">+ Tempo excedente:</span>
-                        <span className="text-green-400 font-semibold">R$ {receipt.overtime_value.toFixed(2)}</span>
+                        <span className="text-green-400 font-semibold">R$ {formatBRL(receipt.overtime_value)}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-slate-600">
                       <span className="text-white">Total do recibo:</span>
-                      <span className="text-green-400">R$ {receipt.final_total.toFixed(2)}</span>
+                      <span className="text-green-400">R$ {formatBRL(receipt.final_total)}</span>
                     </div>
                   </div>
                 </div>
