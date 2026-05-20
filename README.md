@@ -54,6 +54,7 @@ A live public deployment of this template is available at [https://d1-template.t
    npx wrangler d1 migrations apply --remote d1-template-database
    ```
 
+
    
 4. Deploy the project!
    ```bash
