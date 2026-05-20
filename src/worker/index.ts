@@ -27,7 +27,6 @@ app.get("/api/clients", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching clients:", error);
     return c.json({ error: "Failed to fetch clients" }, 500);
   }
 });
@@ -105,7 +104,6 @@ app.post("/api/clients", async (c) => {
       return c.json(newClient, 201);
     }
   } catch (error) {
-    console.error("Error creating/updating client:", error);
     return c.json({ error: "Failed to create/update client" }, 500);
   }
 });
@@ -151,7 +149,6 @@ app.put("/api/clients/:id", async (c) => {
 
     return c.json(updatedClient);
   } catch (error) {
-    console.error("Error updating client:", error);
     return c.json({ error: "Failed to update client" }, 500);
   }
 });
@@ -171,7 +168,6 @@ app.delete("/api/clients/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting client:", error);
     return c.json({ error: "Failed to delete client" }, 500);
   }
 });
@@ -223,7 +219,6 @@ app.post("/api/quotes", async (c) => {
 
     return c.json(newQuote, 201);
   } catch (error) {
-    console.error("Error creating quote:", error);
     return c.json({ error: "Failed to create quote" }, 500);
   }
 });
@@ -246,7 +241,6 @@ app.get("/api/quotes/client/:clientId", async (c) => {
     
     return c.json(quotes);
   } catch (error) {
-    console.error("Error fetching quotes:", error);
     return c.json({ error: "Failed to fetch quotes" }, 500);
   }
 });
@@ -305,7 +299,6 @@ app.post("/api/quotes/:id/approve", async (c) => {
     
     return c.json(updatedQuote);
   } catch (error) {
-    console.error("Error approving quote:", error);
     return c.json({ error: "Failed to approve quote" }, 500);
   }
 });
@@ -337,7 +330,6 @@ app.get("/api/quotes", async (c) => {
     
     return c.json(quotes);
   } catch (error) {
-    console.error("Error fetching quotes:", error);
     return c.json({ error: "Failed to fetch quotes" }, 500);
   }
 });
@@ -357,7 +349,6 @@ app.delete("/api/quotes/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting quote:", error);
     return c.json({ error: "Failed to delete quote" }, 500);
   }
 });
@@ -386,7 +377,6 @@ app.post("/api/appointments", async (c) => {
 
     return c.json(newAppointment, 201);
   } catch (error) {
-    console.error("Error creating appointment:", error);
     return c.json({ error: "Falha ao criar agendamento" }, 500);
   }
 });
@@ -425,7 +415,6 @@ app.get("/api/appointments", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching appointments:", error);
     return c.json({ error: "Falha ao buscar agendamentos" }, 500);
   }
 });
@@ -451,7 +440,6 @@ app.put("/api/appointments/:id", async (c) => {
 
     return c.json(updatedAppointment);
   } catch (error) {
-    console.error("Error updating appointment:", error);
     return c.json({ error: "Falha ao atualizar agendamento" }, 500);
   }
 });
@@ -471,7 +459,6 @@ app.delete("/api/appointments/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting appointment:", error);
     return c.json({ error: "Falha ao excluir agendamento" }, 500);
   }
 });
@@ -505,7 +492,6 @@ app.post("/api/receipts", async (c) => {
 
     return c.json(newReceipt, 201);
   } catch (error) {
-    console.error("Error creating receipt:", error);
     return c.json({ error: "Failed to create receipt" }, 500);
   }
 });
@@ -521,7 +507,6 @@ app.get("/api/receipts/quote/:quoteId", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching receipts:", error);
     return c.json({ error: "Failed to fetch receipts" }, 500);
   }
 });
@@ -550,7 +535,6 @@ app.post("/api/monthly-receipts", async (c) => {
 
     return c.json(newReceipt, 201);
   } catch (error) {
-    console.error("Error creating monthly receipt:", error);
     return c.json({ error: "Failed to create monthly receipt" }, 500);
   }
 });
@@ -566,7 +550,6 @@ app.get("/api/monthly-receipts/client/:clientId", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching monthly receipts:", error);
     return c.json({ error: "Failed to fetch monthly receipts" }, 500);
   }
 });
@@ -592,7 +575,6 @@ app.delete("/api/monthly-receipts/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting monthly receipt:", error);
     return c.json({ error: "Failed to delete monthly receipt" }, 500);
   }
 });
@@ -618,7 +600,6 @@ app.delete("/api/receipts/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting receipt:", error);
     return c.json({ error: "Failed to delete receipt" }, 500);
   }
 });
@@ -661,7 +642,6 @@ app.post("/api/cash-transactions", async (c) => {
 
     return c.json(newTransaction, 201);
   } catch (error) {
-    console.error("Error creating cash transaction:", error);
     return c.json({ error: "Falha ao criar transação" }, 500);
   }
 });
@@ -700,7 +680,6 @@ app.get("/api/cash-transactions", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching cash transactions:", error);
     return c.json({ error: "Falha ao buscar transações" }, 500);
   }
 });
@@ -742,7 +721,6 @@ app.get("/api/cash-balance", async (c) => {
       balance
     });
   } catch (error) {
-    console.error("Error fetching cash balance:", error);
     return c.json({ error: "Falha ao buscar saldo" }, 500);
   }
 });
@@ -776,7 +754,6 @@ app.put("/api/cash-transactions/:id", async (c) => {
 
     return c.json(updatedTransaction);
   } catch (error) {
-    console.error("Error updating cash transaction:", error);
     return c.json({ error: "Falha ao atualizar transação" }, 500);
   }
 });
@@ -796,7 +773,6 @@ app.delete("/api/cash-transactions/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting cash transaction:", error);
     return c.json({ error: "Falha ao excluir transação" }, 500);
   }
 });
@@ -926,7 +902,6 @@ app.get("/api/analytics/dashboard", async (c) => {
       stats: statsResult || {}
     });
   } catch (error) {
-    console.error("Error fetching analytics:", error);
     return c.json({ error: "Falha ao buscar analytics" }, 500);
   }
 });
@@ -957,7 +932,6 @@ app.post("/api/payments", async (c) => {
 
     return c.json(newPayment, 201);
   } catch (error) {
-    console.error("Error creating payment:", error);
     return c.json({ error: "Falha ao criar pagamento" }, 500);
   }
 });
@@ -973,7 +947,6 @@ app.get("/api/payments/quote/:quoteId", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching payments:", error);
     return c.json({ error: "Falha ao buscar pagamentos" }, 500);
   }
 });
@@ -1012,7 +985,6 @@ app.get("/api/payments", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching payments:", error);
     return c.json({ error: "Falha ao buscar pagamentos" }, 500);
   }
 });
@@ -1038,7 +1010,6 @@ app.put("/api/payments/:id", async (c) => {
 
     return c.json(updatedPayment);
   } catch (error) {
-    console.error("Error updating payment:", error);
     return c.json({ error: "Falha ao atualizar pagamento" }, 500);
   }
 });
@@ -1058,7 +1029,6 @@ app.delete("/api/payments/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting payment:", error);
     return c.json({ error: "Falha ao excluir pagamento" }, 500);
   }
 });
@@ -1089,7 +1059,6 @@ app.post("/api/project-status", async (c) => {
 
     return c.json(newStatus, 201);
   } catch (error) {
-    console.error("Error creating project status:", error);
     return c.json({ error: "Falha ao criar status do projeto" }, 500);
   }
 });
@@ -1105,7 +1074,6 @@ app.get("/api/project-status/quote/:quoteId", async (c) => {
     
     return c.json(result || null);
   } catch (error) {
-    console.error("Error fetching project status:", error);
     return c.json({ error: "Falha ao buscar status do projeto" }, 500);
   }
 });
@@ -1132,7 +1100,6 @@ app.get("/api/project-status", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching project statuses:", error);
     return c.json({ error: "Falha ao buscar status dos projetos" }, 500);
   }
 });
@@ -1158,7 +1125,6 @@ app.put("/api/project-status/:id", async (c) => {
 
     return c.json(updatedStatus);
   } catch (error) {
-    console.error("Error updating project status:", error);
     return c.json({ error: "Falha ao atualizar status do projeto" }, 500);
   }
 });
@@ -1249,7 +1215,6 @@ app.get("/api/analytics/financial-report", async (c) => {
       }
     });
   } catch (error) {
-    console.error("Error generating financial report:", error);
     return c.json({ error: "Falha ao gerar relatório financeiro" }, 500);
   }
 });
@@ -1377,7 +1342,6 @@ app.get("/api/analytics/dashboard", async (c) => {
       }
     });
   } catch (error) {
-    console.error("Error fetching analytics:", error);
     return c.json({ error: "Failed to fetch analytics" }, 500);
   }
 });
@@ -1391,7 +1355,6 @@ app.get("/api/service-prices", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching service prices:", error);
     return c.json({ error: "Failed to fetch service prices" }, 500);
   }
 });
@@ -1421,7 +1384,6 @@ app.put("/api/service-prices/:id", async (c) => {
 
     return c.json(updatedPrice);
   } catch (error) {
-    console.error("Error updating service price:", error);
     return c.json({ error: "Failed to update price" }, 500);
   }
 });
@@ -1437,7 +1399,6 @@ app.get("/api/services", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching services:", error);
     return c.json({ error: "Failed to fetch services" }, 500);
   }
 });
@@ -1489,7 +1450,6 @@ app.post("/api/services", async (c) => {
 
     return c.json(newService, 201);
   } catch (error) {
-    console.error("Error creating service:", error);
     return c.json({ error: "Failed to create service" }, 500);
   }
 });
@@ -1529,7 +1489,6 @@ app.put("/api/services/:id", async (c) => {
 
     return c.json(updatedService);
   } catch (error) {
-    console.error("Error updating service:", error);
     return c.json({ error: "Failed to update service" }, 500);
   }
 });
@@ -1563,7 +1522,6 @@ app.put("/api/services/:id/toggle", async (c) => {
 
     return c.json(updatedService);
   } catch (error) {
-    console.error("Error toggling service status:", error);
     return c.json({ error: "Failed to toggle service status" }, 500);
   }
 });
@@ -1583,7 +1541,6 @@ app.delete("/api/services/:id", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting service:", error);
     return c.json({ error: "Failed to delete service" }, 500);
   }
 });
@@ -1607,7 +1564,6 @@ app.put("/api/services/reorder", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error reordering services:", error);
     return c.json({ error: "Failed to reorder services" }, 500);
   }
 });
@@ -1657,7 +1613,6 @@ app.get("/api/project-files/:projectId/whatsapp-link", async (c) => {
       project_status: project.status
     });
   } catch (error) {
-    console.error("Error generating WhatsApp link:", error);
     return c.json({ error: "Falha ao gerar link do WhatsApp" }, 500);
   }
 });
@@ -1770,18 +1725,15 @@ app.post("/api/project-files/:projectId", async (c) => {
             const whatsappUrl = `https://wa.me/${project.whatsapp.replace(/\D/g, '')}?text=${message}`;
             
             // Log the WhatsApp URL for auto-opening
-            console.log('Payment link created. WhatsApp URL:', whatsappUrl);
           }
         }
       }
     } catch (automationError) {
-      console.error('Automation error (non-blocking):', automationError);
       // Don't fail the file upload if automation fails
     }
 
     return c.json(newFile, 201);
   } catch (error) {
-    console.error("Error uploading file:", error);
     return c.json({ error: "Falha ao fazer upload do arquivo" }, 500);
   }
 });
@@ -1797,7 +1749,6 @@ app.get("/api/project-files/:projectId", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching project files:", error);
     return c.json({ error: "Falha ao buscar arquivos do projeto" }, 500);
   }
 });
@@ -1838,7 +1789,6 @@ app.get("/api/files/:fileId", async (c) => {
     
     return c.body(object.body, { headers });
   } catch (error) {
-    console.error("Error downloading file:", error);
     return c.json({ error: "Falha ao baixar arquivo" }, 500);
   }
 });
@@ -1871,7 +1821,6 @@ app.delete("/api/project-files/:fileId", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting file:", error);
     return c.json({ error: "Falha ao excluir arquivo" }, 500);
   }
 });
@@ -1910,7 +1859,6 @@ app.post("/api/portal-links/:projectId", async (c) => {
 
     return c.json(newLink, 201);
   } catch (error) {
-    console.error("Error creating portal link:", error);
     return c.json({ error: "Falha ao criar link do portal" }, 500);
   }
 });
@@ -1926,7 +1874,6 @@ app.get("/api/portal-links/project/:projectId", async (c) => {
     
     return c.json(result.results || []);
   } catch (error) {
-    console.error("Error fetching portal links:", error);
     return c.json({ error: "Falha ao buscar links do portal" }, 500);
   }
 });
@@ -1983,7 +1930,6 @@ app.get("/api/portal/:token", async (c) => {
       files: filesResult.results || []
     });
   } catch (error) {
-    console.error("Error fetching portal data:", error);
     return c.json({ error: "Falha ao buscar dados do portal" }, 500);
   }
 });
@@ -2044,7 +1990,6 @@ app.get("/api/portal/:token/file/:fileId/preview", async (c) => {
     // For non-audio files or if preview fails, return full file
     return c.body(object.body, { headers });
   } catch (error) {
-    console.error("Error serving file preview:", error);
     return c.json({ error: "Falha ao carregar preview" }, 500);
   }
 });
@@ -2092,7 +2037,6 @@ app.get("/api/portal/:token/file/:fileId/download", async (c) => {
     
     return c.body(object.body, { headers });
   } catch (error) {
-    console.error("Error downloading file:", error);
     return c.json({ error: "Falha ao baixar arquivo" }, 500);
   }
 });
@@ -2116,7 +2060,6 @@ app.put("/api/portal-links/:linkId/verify-payment", async (c) => {
 
     return c.json(updatedLink);
   } catch (error) {
-    console.error("Error verifying payment:", error);
     return c.json({ error: "Falha ao verificar pagamento" }, 500);
   }
 });
@@ -2150,7 +2093,6 @@ app.put("/api/portal-links/:linkId/toggle", async (c) => {
 
     return c.json(updatedLink);
   } catch (error) {
-    console.error("Error toggling portal link:", error);
     return c.json({ error: "Falha ao alterar status do link" }, 500);
   }
 });
@@ -2170,7 +2112,6 @@ app.delete("/api/portal-links/:linkId", async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error("Error deleting portal link:", error);
     return c.json({ error: "Falha ao excluir link" }, 500);
   }
 });
@@ -2240,7 +2181,6 @@ app.get("/api/cnpj/:cnpj", async (c) => {
     
     return c.json({ error: "CNPJ não encontrado" }, 404);
   } catch (error) {
-    console.error("Error fetching CNPJ data:", error);
     return c.json({ error: "Erro ao buscar dados do CNPJ" }, 500);
   }
 });
@@ -2251,11 +2191,8 @@ app.get("/api/cnpj/:cnpj", async (c) => {
 export default {
   fetch: app.fetch,
   async scheduled(event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
-    console.log('[Cron] Scheduled event triggered:', event.cron);
     
     // Run cleanup of archived quotes (older than 30 days)
     await cleanupArchivedQuotes(env);
-    
-    console.log('[Cron] Scheduled event completed');
   },
 };
