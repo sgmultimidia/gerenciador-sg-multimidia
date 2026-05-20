@@ -3,7 +3,6 @@ import { X, Plus, Calendar, Upload, Download, Trash2, File, FileText, FileVideo,
 import type { Quote, Client, ProjectFile, ClientPortalLink } from '@/shared/types';
 import { useToast } from '@/react-app/components/ToastContainer';
 import { useConfirm } from '@/react-app/components/ConfirmDialog';
-import RecurringProjects from '@/react-app/components/RecurringProjects';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
 import { Select } from './ui';
 import ProjectCard from './project-status/ProjectCard';
@@ -37,7 +36,6 @@ export default function ProjectStatus({ isOpen, onClose, clients }: ProjectStatu
   const [creatingLink, setCreatingLink] = useState(false);
   const [newLinkExpireDays, setNewLinkExpireDays] = useState('30');
   const [newLinkPaymentRequired, setNewLinkPaymentRequired] = useState(false);
-  const [showRecurringProjects, setShowRecurringProjects] = useState(false);
 
   // Form fields
   const [selectedQuote, setSelectedQuote] = useState('');
@@ -520,13 +518,6 @@ export default function ProjectStatus({ isOpen, onClose, clients }: ProjectStatu
                   <option value="cancelled">Cancelados</option>
                 </Select>
 
-                <button
-                  onClick={() => setShowRecurringProjects(true)}
-                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-semibold transition-all flex items-center justify-center gap-2 whitespace-nowrap"
-                >
-                  <Calendar className="w-5 h-5" />
-                  Projetos Recorrentes
-                </button>
               </div>
 
               <button
@@ -973,8 +964,8 @@ export default function ProjectStatus({ isOpen, onClose, clients }: ProjectStatu
 
       {/* Recurring Projects Modal */}
       <RecurringProjects
-        isOpen={showRecurringProjects}
-        onClose={() => setShowRecurringProjects(false)}
+        isOpen={false}
+        onClose={() => {}}
         clients={clients}
       />
     </div>
