@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, DollarSign, Calendar, 
-  FileText, FolderKanban, Plus, Settings, RefreshCw
+  FileText, FolderKanban, Plus, Settings, RefreshCw, Search
 } from 'lucide-react';
 import type { Client, Service } from '@/shared/types';
 import { useToast } from '@/react-app/components/ToastContainer';
@@ -32,6 +32,7 @@ import ReceiptGeneratorModal from '@/react-app/components/ReceiptGeneratorModal'
 import RecurringProjects from '@/react-app/components/RecurringProjects';
 import Prospects from '@/react-app/components/Prospects';
 import Transmissions from '@/react-app/components/Transmissions';
+import GlobalSearch from '@/react-app/components/GlobalSearch';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
 
 export default function HomeNew() {
@@ -56,6 +57,7 @@ export default function HomeNew() {
   const [showRecurringProjects, setShowRecurringProjects] = useState(false);
   const [showProspects, setShowProspects] = useState(false);
   const [showTransmissions, setShowTransmissions] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [showMonthlyReceipt, setShowMonthlyReceipt] = useState(false);
   const [showWithdrawalControl, setShowWithdrawalControl] = useState(false);
   const [showQuoteWizard, setShowQuoteWizard] = useState(false);
@@ -96,6 +98,17 @@ export default function HomeNew() {
 
   useEffect(() => {
     Promise.all([loadClients(), loadServices()]);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   useEffect(() => {
@@ -844,6 +857,15 @@ export default function HomeNew() {
             className={`${isMobile ? 'h-7' : 'h-9'} w-auto object-contain`}
           />
           <motion.button
+            onClick={() => setShowGlobalSearch(true)}
+            className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"
+            title="Busca Global (Ctrl+K)"
+            whileHover={{ scale: 1.05 }}
+            whileTap={tapScale}
+          >
+            <Search className="w-5 h-5" />
+          </motion.button>
+          <motion.button
             onClick={() => setShowServicesManagement(true)}
             className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"
             title="Gerenciar Serviços e Preços"
@@ -1267,6 +1289,19 @@ export default function HomeNew() {
         }}
         quote={selectedQuoteForReceipt}
         client={selectedClientForReceipt}
+      />
+      <GlobalSearch
+        isOpen={showGlobalSearch}
+        onClose={() => setShowGlobalSearch(false)}
+        onNavigate={(type, id) => {
+          setShowGlobalSearch(false);
+          if (type === 'client') setShowClientList(true);
+          else if (type === 'quote') { setShowUniversalSearch(true); setTimeout(() => handleUniversalSearch(''), 100); }
+          else if (type === 'prospect') setShowProspects(true);
+          else if (type === 'contract') setShowContractsManagement(true);
+          else if (type === 'transaction') setShowCashRegister(true);
+          else if (type === 'transmission') setShowTransmissions(true);
+        }}
       />
       <Transmissions
         isOpen={showTransmissions}

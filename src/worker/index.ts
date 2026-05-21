@@ -2029,6 +2029,63 @@ app.delete("/api/transmissions/:id", async (c) => {
   }
 });
 
+
+// ==================== GLOBAL SEARCH ====================
+
+app.get("/api/search", async (c) => {
+  try {
+    const q = c.req.query("q") || "";
+    if (!q.trim()) return c.json([]);
+
+    const pattern = `%${q}%`;
+    const results: any[] = [];
+
+    // Clients
+    const clients = await c.env.DB.prepare(
+      "SELECT id, name, whatsapp, email FROM clients WHERE name LIKE ? OR whatsapp LIKE ? OR email LIKE ? OR cpf_cnpj LIKE ? LIMIT 5"
+    ).bind(pattern, pattern, pattern, pattern).all();
+    for (const c of (clients.results || [])) {
+      results.push({ type: 'client', id: c.id, title: c.name, subtitle: [c.whatsapp, c.email].filter(Boolean).join(' · ') || 'Sem contato' });
+    }
+
+    // Quotes
+    const quotes = await c.env.DB.prepare(
+      "SELECT q.id, q.quote_number, q.total, q.status, c.name as client_name FROM quotes q JOIN clients c ON q.client_id = c.id WHERE c.name LIKE ? OR q.quote_number LIKE ? LIMIT 5"
+    ).bind(pattern, pattern).all();
+    for (const q of (quotes.results || [])) {
+      results.push({ type: 'quote', id: q.id, title: `Orçamento #${q.quote_number} — ${q.client_name}`, subtitle: `R$ ${Number(q.total).toLocaleString('pt-BR', {minimumFractionDigits:2})} · ${q.status === 'approved' ? 'Aprovado' : 'Pendente'}` });
+    }
+
+    // Prospects
+    const prospects = await c.env.DB.prepare(
+      "SELECT id, name, business_type, status, whatsapp FROM prospects WHERE name LIKE ? OR business_type LIKE ? OR whatsapp LIKE ? LIMIT 5"
+    ).bind(pattern, pattern, pattern).all();
+    for (const p of (prospects.results || [])) {
+      results.push({ type: 'prospect', id: p.id, title: p.name, subtitle: [p.business_type, p.whatsapp].filter(Boolean).join(' · ') || '' });
+    }
+
+    // Contracts
+    const contracts = await c.env.DB.prepare(
+      "SELECT ct.id, ct.contract_number, ct.status, c.name as client_name FROM contracts ct JOIN quotes q ON ct.quote_id = q.id JOIN clients c ON q.client_id = c.id WHERE c.name LIKE ? OR ct.contract_number LIKE ? LIMIT 5"
+    ).bind(pattern, pattern).all();
+    for (const ct of (contracts.results || [])) {
+      results.push({ type: 'contract', id: ct.id, title: `Contrato ${ct.contract_number} — ${ct.client_name}`, subtitle: ct.status });
+    }
+
+    // Cash transactions
+    const transactions = await c.env.DB.prepare(
+      "SELECT id, description, amount, type, transaction_date FROM cash_transactions WHERE description LIKE ? LIMIT 5"
+    ).bind(pattern).all();
+    for (const t of (transactions.results || [])) {
+      results.push({ type: 'transaction', id: t.id, title: t.description, subtitle: `${t.type === 'income' ? 'Entrada' : 'Saída'} · R$ ${Number(t.amount).toLocaleString('pt-BR', {minimumFractionDigits:2})} · ${new Date(t.transaction_date).toLocaleDateString('pt-BR')}` });
+    }
+
+    return c.json(results);
+  } catch (error) {
+    return c.json({ error: "Search failed" }, 500);
+  }
+});
+
 app.get("/api/portal/:token", async (c) => {
   try {
     const token = c.req.param("token");
