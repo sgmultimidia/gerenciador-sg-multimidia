@@ -111,19 +111,20 @@ export default function ContractViewer({ isOpen, onClose, contract }: Props) {
   };
 
   const handleSendWhatsApp = () => {
-    if (!contract.client_name) {
-      alert('Dados do cliente não encontrados');
-      return;
-    }
-
     const message = encodeURIComponent(
-      `Olá ${contract.client_name}!\n\n` +
+      `Olá ${contract.client_name || 'Cliente'}!\n\n` +
       `Segue o contrato ${contract.contract_number} para sua análise e assinatura.\n\n` +
       `Por favor, revise o documento e confirme sua concordância.\n\n` +
       `Qualquer dúvida, estou à disposição!`
     );
 
-    window.open(`https://wa.me/?text=${message}`, '_blank');
+    const whatsapp = (contract as any).whatsapp;
+    if (whatsapp) {
+      const number = whatsapp.replace(/\D/g, '');
+      window.open(`https://wa.me/55${number}?text=${message}`, '_blank');
+    } else {
+      window.open(`https://wa.me/?text=${message}`, '_blank');
+    }
   };
 
   return (
@@ -155,6 +156,13 @@ export default function ContractViewer({ isOpen, onClose, contract }: Props) {
                 >
                   <Download className="w-4 h-4" />
                   PDF
+                </button>
+                <button
+                  onClick={handleSendWhatsApp}
+                  className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  WhatsApp
                 </button>
               </>
             ) : (

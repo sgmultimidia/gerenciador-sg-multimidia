@@ -3,7 +3,6 @@ import { FileText, Clock } from 'lucide-react';
 import ResponsiveModal from './ResponsiveModal';
 import { useToast } from './ToastContainer';
 import { generateReceiptPDF } from '@/react-app/utils/pdfGenerator';
-import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface Quote {
   id: number;
@@ -105,6 +104,14 @@ export default function ReceiptGeneratorModal({ isOpen, onClose, quote, client }
       });
 
       toast.success('Recibo gerado com sucesso!');
+      
+      // Offer WhatsApp
+      if (client.whatsapp) {
+        const number = client.whatsapp.replace(/\D/g, '');
+        const msg = encodeURIComponent(`Olá ${client.name}! Segue o recibo referente ao orçamento #${quote.quote_number} no valor de R$ ${finalTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}. O PDF foi gerado e está disponível. Qualquer dúvida estou à disposição!`);
+        window.open(`https://wa.me/55${number}?text=${msg}`, '_blank');
+      }
+      
       onClose();
       
       // Reset form
@@ -137,7 +144,7 @@ export default function ReceiptGeneratorModal({ isOpen, onClose, quote, client }
                 Cliente: {client.name}
               </p>
               <p className="text-xs text-blue-200/80">
-                Valor: R$ {formatBRL(quote.total)}
+                Valor: R$ {quote.total.toFixed(2)}
               </p>
             </div>
           </div>
@@ -192,12 +199,12 @@ export default function ReceiptGeneratorModal({ isOpen, onClose, quote, client }
           <div className="flex justify-between items-center text-white">
             <div>
               <p className="text-sm opacity-90">Valor do Orçamento</p>
-              <p className="text-2xl font-bold">R$ {formatBRL(quote.total)}</p>
+              <p className="text-2xl font-bold">R$ {quote.total.toFixed(2)}</p>
             </div>
             {parseFloat(overtimeValue) > 0 && (
               <div className="text-right">
                 <p className="text-sm opacity-90">+ Hora Extra</p>
-                <p className="text-xl font-semibold">R$ {formatBRL(parseFloat(overtimeValue))}</p>
+                <p className="text-xl font-semibold">R$ {parseFloat(overtimeValue).toFixed(2)}</p>
               </div>
             )}
           </div>
@@ -206,7 +213,7 @@ export default function ReceiptGeneratorModal({ isOpen, onClose, quote, client }
             <div className="mt-3 pt-3 border-t border-white/20">
               <div className="flex justify-between items-center">
                 <p className="text-sm font-medium">Total Final:</p>
-                <p className="text-2xl font-bold">R$ {formatBRL(calculateFinalTotal())}</p>
+                <p className="text-2xl font-bold">R$ {calculateFinalTotal().toFixed(2)}</p>
               </div>
             </div>
           )}
