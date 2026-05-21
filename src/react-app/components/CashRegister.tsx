@@ -271,18 +271,18 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-green-300 text-sm font-semibold uppercase tracking-wide">Entradas</span>
+                  <span className="text-green-300 text-xs font-semibold uppercase tracking-wide">Entradas</span>
                   <TrendingUp className="w-5 h-5 text-green-400" />
                 </div>
-                <p className="text-lg font-bold text-green-400 truncate">R$ {balance.income.toFixed(2)}</p>
+                <p className="text-sm font-bold text-green-400 break-all">R$ {balance.income.toFixed(2)}</p>
               </div>
 
               <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-red-300 text-sm font-semibold uppercase tracking-wide">Saídas</span>
+                  <span className="text-red-300 text-xs font-semibold uppercase tracking-wide">Saídas</span>
                   <TrendingDown className="w-5 h-5 text-red-400" />
                 </div>
-                <p className="text-lg font-bold text-red-400 truncate">R$ {balance.expense.toFixed(2)}</p>
+                <p className="text-sm font-bold text-red-400 break-all">R$ {balance.expense.toFixed(2)}</p>
               </div>
 
               <div className={`bg-gradient-to-br ${balance.balance >= 0 ? 'from-blue-500/20 to-blue-600/10 border-blue-500/30' : 'from-orange-500/20 to-orange-600/10 border-orange-500/30'} border rounded-lg p-4`}>
@@ -290,7 +290,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
                   <span className={`${balance.balance >= 0 ? 'text-blue-300' : 'text-orange-300'} text-sm font-semibold uppercase tracking-wide`}>Saldo</span>
                   <DollarSign className={`w-5 h-5 ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`} />
                 </div>
-                <p className={`text-3xl font-bold ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>R$ {balance.balance.toFixed(2)}</p>
+                <p className={`text-sm font-bold ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>R$ {balance.balance.toFixed(2)}</p>
               </div>
             </div>
           </div>
