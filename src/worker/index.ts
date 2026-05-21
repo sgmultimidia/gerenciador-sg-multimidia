@@ -2086,6 +2086,24 @@ app.get("/api/search", async (c) => {
   }
 });
 
+
+// Portal approval
+app.post("/api/portal/:token/approve", async (c) => {
+  try {
+    const token = c.req.param("token");
+    const link = await c.env.DB.prepare(
+      "SELECT * FROM client_portal_links WHERE token = ? AND is_active = 1"
+    ).bind(token).first() as any;
+    if (!link) return c.json({ error: "Link inválido" }, 404);
+    await c.env.DB.prepare(
+      "UPDATE client_portal_links SET payment_verified = 1, updated_at = datetime('now') WHERE token = ?"
+    ).bind(token).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to approve" }, 500);
+  }
+});
+
 app.get("/api/portal/:token", async (c) => {
   try {
     const token = c.req.param("token");
