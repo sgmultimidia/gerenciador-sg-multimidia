@@ -97,7 +97,7 @@ export default function NewClientModal({
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-        <div className="bg-slate-800 border-b border-blue-500/30 p-4 md:p-6 flex justify-between items-center flex-shrink-0">
+        <div className="bg-gradient-to-r from-primary-900 to-blue-900 border-b border-blue-500/30 p-4 md:p-6 flex justify-between items-center flex-shrink-0">
           <h3 className="text-xl md:text-2xl font-bold text-white">Novo Cliente</h3>
           <button
             onClick={onClose}

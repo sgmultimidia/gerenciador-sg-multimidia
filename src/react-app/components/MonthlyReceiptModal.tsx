@@ -124,7 +124,7 @@ export default function MonthlyReceiptModal({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-slate-800 rounded-lg shadow-2xl border border-green-500/30 max-w-2xl w-full my-8 flex flex-col">
-        <div className="bg-slate-800 border-b border-green-500/30 p-6 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-green-900 to-emerald-900 border-b border-green-500/30 p-6 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center gap-3">
             <FileText className="w-8 h-8 text-green-400" />
             <div>

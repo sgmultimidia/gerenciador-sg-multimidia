@@ -363,7 +363,7 @@ export default function AppointmentsCalendar({ isOpen, onClose, clients }: Appoi
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-2 md:p-4 lg:p-6">
       <div className="bg-slate-800 rounded-none sm:rounded-lg shadow-2xl border border-blue-500/30 w-full h-full sm:h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] flex flex-col">
         {/* Header */}
-        <div className="bg-slate-800 border-b border-blue-500/30 p-3 sm:p-4 flex justify-between items-center flex-shrink-0">
+        <div className="bg-gradient-to-r from-orange-900 to-amber-900 border-b border-orange-500/30 p-3 sm:p-4 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center gap-2">
             <Calendar className="w-6 h-6 text-blue-400" />
             <h3 className="text-lg sm:text-xl font-bold text-white">Agendamentos</h3>

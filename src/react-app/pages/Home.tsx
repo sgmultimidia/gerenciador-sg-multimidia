@@ -106,6 +106,14 @@ export default function HomeNew() {
         e.preventDefault();
         setShowGlobalSearch(true);
       }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'O') {
+        e.preventDefault();
+        setShowQuoteWizard(true);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        setShowNewClientModal(true);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -1127,20 +1135,23 @@ export default function HomeNew() {
       />
 
       {showWithdrawalControl && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-slate-800 rounded-xl max-w-6xl w-full p-6 my-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Controle de Retiradas</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-slate-800 rounded-xl max-w-6xl w-full my-8 shadow-2xl border border-slate-700 flex flex-col">
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 border-b border-slate-700 p-6 flex justify-between items-center flex-shrink-0">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Controle de Retiradas</h2>
+                <p className="text-slate-400 text-sm mt-0.5">Distribuição isenta de impostos (MEI)</p>
+              </div>
               <button
                 onClick={() => setShowWithdrawalControl(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-all"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <WithdrawalControl />
+            <div className="p-6 overflow-y-auto">
+              <WithdrawalControl />
+            </div>
           </div>
         </div>
       )}
