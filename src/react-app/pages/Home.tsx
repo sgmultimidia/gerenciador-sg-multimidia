@@ -31,6 +31,7 @@ import ContractViewer from '@/react-app/components/contracts/ContractViewer';
 import ReceiptGeneratorModal from '@/react-app/components/ReceiptGeneratorModal';
 import RecurringProjects from '@/react-app/components/RecurringProjects';
 import Prospects from '@/react-app/components/Prospects';
+import Transmissions from '@/react-app/components/Transmissions';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
 
 export default function HomeNew() {
@@ -54,6 +55,7 @@ export default function HomeNew() {
   const [showProjectStatus, setShowProjectStatus] = useState(false);
   const [showRecurringProjects, setShowRecurringProjects] = useState(false);
   const [showProspects, setShowProspects] = useState(false);
+  const [showTransmissions, setShowTransmissions] = useState(false);
   const [showMonthlyReceipt, setShowMonthlyReceipt] = useState(false);
   const [showWithdrawalControl, setShowWithdrawalControl] = useState(false);
   const [showQuoteWizard, setShowQuoteWizard] = useState(false);
@@ -756,14 +758,46 @@ export default function HomeNew() {
         </motion.div>
       </div>
 
-      {/* Prospecção */}
-      <div className="grid grid-cols-1 gap-6">
+      {/* Transmissões e Prospecção */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div
           className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden"
           variants={cardVariants}
           initial="hidden"
           animate="visible"
           transition={{ delay: 0.7 }}
+          whileHover={hoverLift}
+        >
+          <div className="bg-gradient-to-r from-red-900/50 to-orange-800/30 p-4 border-b border-slate-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-600/20 rounded-lg">
+                <Calendar className="w-6 h-6 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Transmissões ao Vivo</h3>
+                <p className="text-sm text-slate-400">Galpão da Querência e Podcast</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4">
+            <motion.button
+              onClick={() => setShowTransmissions(true)}
+              className="w-full px-4 py-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg text-left transition-all border border-slate-600/50 hover:border-red-500/50 flex items-center justify-between group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={tapScale}
+            >
+              <span className="text-sm font-medium text-white">Gerenciar Transmissões</span>
+              <Calendar className="w-4 h-4 text-slate-400 group-hover:text-red-400" />
+            </motion.button>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden"
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.8 }}
           whileHover={hoverLift}
         >
           <div className="bg-gradient-to-r from-cyan-900/50 to-teal-800/30 p-4 border-b border-slate-700">
@@ -1233,6 +1267,10 @@ export default function HomeNew() {
         }}
         quote={selectedQuoteForReceipt}
         client={selectedClientForReceipt}
+      />
+      <Transmissions
+        isOpen={showTransmissions}
+        onClose={() => setShowTransmissions(false)}
       />
       <Prospects
         isOpen={showProspects}

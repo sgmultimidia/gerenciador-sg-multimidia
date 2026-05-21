@@ -1961,6 +1961,74 @@ app.delete("/api/prospects/:id", async (c) => {
   }
 });
 
+
+// ==================== TRANSMISSIONS ====================
+
+app.get("/api/transmissions", async (c) => {
+  try {
+    const type = c.req.query("type");
+    let query = "SELECT * FROM transmissions";
+    if (type) query += ` WHERE type = '${type}'`;
+    query += " ORDER BY transmission_date DESC";
+    const result = await c.env.DB.prepare(query).all();
+    return c.json(result.results || []);
+  } catch (error) {
+    return c.json({ error: "Failed to fetch transmissions" }, 500);
+  }
+});
+
+app.post("/api/transmissions", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { type, transmission_date, guest_name, divulgation_date, notes, status } = body;
+    if (!transmission_date) return c.json({ error: "Data obrigatória" }, 400);
+    const result = await c.env.DB.prepare(
+      "INSERT INTO transmissions (type, transmission_date, guest_name, divulgation_date, notes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))"
+    ).bind(type, transmission_date, guest_name || null, divulgation_date || null, notes || null, status || 'pending').run();
+    return c.json({ id: result.meta.last_row_id }, 201);
+  } catch (error) {
+    return c.json({ error: "Failed to create transmission" }, 500);
+  }
+});
+
+app.put("/api/transmissions/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const body = await c.req.json();
+    const { type, transmission_date, guest_name, divulgation_date, notes, status } = body;
+    await c.env.DB.prepare(
+      "UPDATE transmissions SET type=?, transmission_date=?, guest_name=?, divulgation_date=?, notes=?, status=?, updated_at=datetime('now') WHERE id=?"
+    ).bind(type, transmission_date, guest_name || null, divulgation_date || null, notes || null, status, id).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to update transmission" }, 500);
+  }
+});
+
+app.put("/api/transmissions/:id/checklist", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const { field, value } = await c.req.json();
+    const allowed = ['checklist_studio', 'checklist_social', 'checklist_divulgation'];
+    if (!allowed.includes(field)) return c.json({ error: "Invalid field" }, 400);
+    await c.env.DB.prepare(
+      `UPDATE transmissions SET ${field}=?, updated_at=datetime('now') WHERE id=?`
+    ).bind(value, id).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to update checklist" }, 500);
+  }
+});
+
+app.delete("/api/transmissions/:id", async (c) => {
+  try {
+    await c.env.DB.prepare("DELETE FROM transmissions WHERE id = ?").bind(c.req.param("id")).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete transmission" }, 500);
+  }
+});
+
 app.get("/api/portal/:token", async (c) => {
   try {
     const token = c.req.param("token");
