@@ -860,7 +860,7 @@ export default function HomeNew() {
       >
         <div className={`max-w-[1920px] mx-auto ${isMobile ? 'px-3 py-3' : 'px-4 sm:px-6 lg:px-8 py-4'} flex items-center justify-between`}>
           <img 
-            src="https://019b3337-8e60-7d99-90b6-518278a74e7c.mochausercontent.com/Logo-Branco-PNG.png" 
+            src="/logo-192.png" 
             alt="SG Multimídia"
             className={`${isMobile ? 'h-7' : 'h-9'} w-auto object-contain`}
           />
