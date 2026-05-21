@@ -54,7 +54,7 @@ const PACKAGES = [
 export default function Prospects({ isOpen, onClose, onClientConverted }: ProspectsProps) {
   const toast = useToast();
   const confirm = useConfirm();
-  useLockBodyScroll(isOpen);
+  useLockBodyScroll(isOpen, onClose);
 
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(false);
@@ -234,17 +234,17 @@ export default function Prospects({ isOpen, onClose, onClientConverted }: Prospe
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-5 gap-2 mt-4">
+          <div className="grid grid-cols-5 gap-1 mt-3">
             {Object.entries(STATUS_LABELS).map(([key, label]) => (
               <button
                 key={key}
                 onClick={() => setFilterStatus(filterStatus === key ? 'all' : key)}
-                className={`p-2 rounded-lg text-center transition-all border ${
+                className={`p-1.5 rounded-lg text-center transition-all border ${
                   filterStatus === key ? 'border-white' : 'border-transparent'
                 } ${STATUS_COLORS[key]}/20 hover:${STATUS_COLORS[key]}/30`}
               >
-                <p className="text-white font-bold text-lg">{countByStatus(key)}</p>
-                <p className="text-xs text-slate-300">{label}</p>
+                <p className="text-white font-bold text-base">{countByStatus(key)}</p>
+                <p className="text-xs text-slate-300 truncate">{label}</p>
               </button>
             ))}
           </div>

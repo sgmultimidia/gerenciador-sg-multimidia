@@ -206,7 +206,7 @@ export default function ContractsManagement({ isOpen, onClose }: Props) {
                             <h3 className="text-white font-medium truncate">
                               {template.name}
                             </h3>
-                            {template.is_default && (
+                            {!!template.is_default && (
                               <span className="px-2 py-0.5 bg-green-500/20 text-green-300 text-xs rounded-full">
                                 Padrão
                               </span>

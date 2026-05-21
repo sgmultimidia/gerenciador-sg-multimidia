@@ -495,11 +495,11 @@ export default function RecurringProjects({ isOpen, onClose, clients }: Recurrin
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div className="bg-slate-800 rounded-lg w-full max-w-6xl max-h-[90vh] my-8 shadow-2xl border border-emerald-500/30 flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-900 to-teal-900 p-6 border-b border-emerald-500/30 flex-shrink-0">
+          <div className="bg-gradient-to-r from-emerald-900 to-teal-900 p-4 border-b border-emerald-500/30 flex-shrink-0">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Projetos Recorrentes</h2>
-                <p className="text-emerald-200">Gerencie projetos mensais sem necessidade de novos orçamentos</p>
+                <h2 className="text-xl font-bold text-white">Projetos Recorrentes</h2>
+                <p className="text-emerald-200 text-sm hidden sm:block">Gerencie projetos mensais sem necessidade de novos orçamentos</p>
               </div>
               <button
                 onClick={onClose}
@@ -511,20 +511,20 @@ export default function RecurringProjects({ isOpen, onClose, clients }: Recurrin
           </div>
 
           {/* Stats */}
-          <div className="p-6 border-b border-slate-700">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-emerald-700 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-white">{activeProjects.length}</p>
+          <div className="p-3 border-b border-slate-700">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-emerald-700 rounded-lg p-2 text-center">
+                <p className="text-lg font-bold text-white">{activeProjects.length}</p>
                 <p className="text-emerald-200 text-sm">Projetos Ativos</p>
               </div>
-              <div className="bg-blue-700 rounded-lg p-4 text-center">
+              <div className="bg-blue-700 rounded-lg p-2 text-center">
                 <p className="text-2xl font-bold text-white">
                   R$ {activeProjects.reduce((sum, p) => sum + (p.monthly_value || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-blue-200 text-sm">Receita Mensal Recorrente</p>
               </div>
-              <div className="bg-slate-700 rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold text-white">{inactiveProjects.length}</p>
+              <div className="bg-slate-700 rounded-lg p-2 text-center">
+                <p className="text-lg font-bold text-white">{inactiveProjects.length}</p>
                 <p className="text-slate-300 text-sm">Projetos Inativos</p>
               </div>
             </div>
@@ -627,7 +627,7 @@ export default function RecurringProjects({ isOpen, onClose, clients }: Recurrin
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
           <div className="bg-slate-800 rounded-lg w-full max-w-2xl max-h-[90vh] shadow-2xl border border-emerald-500/30 flex flex-col">
-            <div className="bg-gradient-to-r from-emerald-900 to-teal-900 p-6 border-b border-emerald-500/30 flex-shrink-0">
+            <div className="bg-gradient-to-r from-emerald-900 to-teal-900 p-4 border-b border-emerald-500/30 flex-shrink-0">
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-bold text-white">
                   {editingProject ? 'Editar Projeto Recorrente' : 'Novo Projeto Recorrente'}
