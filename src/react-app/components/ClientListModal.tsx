@@ -155,17 +155,17 @@ export default function ClientListModal({
               exit="exit"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-slate-800 border-b border-blue-500/30 p-6 flex-shrink-0">
+              <div className="bg-gradient-to-r from-primary-900 to-blue-900 border-b border-blue-500/30 p-6 flex-shrink-0">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h3 className="text-2xl font-bold text-white">Gerenciar Clientes</h3>
-                    <p className="text-slate-400 text-sm mt-1">Clique em um cliente para ver as opções disponíveis</p>
+                    <p className="text-blue-200 text-sm mt-1">Clique em um cliente para ver as opções disponíveis</p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="text-slate-400 hover:text-white transition-colors"
+                    className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-all"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 

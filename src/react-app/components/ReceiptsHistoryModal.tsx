@@ -2,7 +2,6 @@ import { X, FileCheck, Trash2 } from 'lucide-react';
 import type { Quote, Receipt } from '@/shared/types';
 import { useConfirm } from '@/react-app/components/ConfirmDialog';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
-import { formatBRL } from '@/react-app/utils/formatBRL';
 
 interface ReceiptsHistoryModalProps {
   isOpen: boolean;
@@ -43,17 +42,17 @@ export default function ReceiptsHistoryModal({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-slate-800 rounded-lg shadow-2xl border border-blue-500/30 max-w-2xl w-full my-8 flex flex-col">
-        <div className="bg-slate-800 border-b border-blue-500/30 p-6 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-green-900 to-emerald-900 border-b border-green-500/30 p-6 flex justify-between items-center flex-shrink-0">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <FileCheck className="w-8 h-8 text-green-400" />
+            <div className="flex items-center gap-3 mb-1">
+              <FileCheck className="w-6 h-6 text-green-400" />
               <h3 className="text-2xl font-bold text-white">Histórico de Recibos</h3>
             </div>
-            <p className="text-slate-400 text-sm">Orçamento #{quote.quote_number}</p>
+            <p className="text-green-200 text-sm">Orçamento #{quote.quote_number}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-all"
           >
             <X className="w-6 h-6" />
           </button>
@@ -89,7 +88,7 @@ export default function ReceiptsHistoryModal({
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="text-right">
-                        <p className="text-green-400 font-bold text-2xl">R$ {formatBRL(receipt.final_total)}</p>
+                        <p className="text-green-400 font-bold text-2xl">R$ {receipt.final_total.toFixed(2)}</p>
                       </div>
                       {onDelete && (
                         <button
@@ -113,7 +112,7 @@ export default function ReceiptsHistoryModal({
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-slate-300">Valor adicional:</span>
-                          <span className="text-white font-semibold">R$ {formatBRL(receipt.overtime_value)}</span>
+                          <span className="text-white font-semibold">R$ {receipt.overtime_value.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -122,17 +121,17 @@ export default function ReceiptsHistoryModal({
                   <div className="border-t border-slate-600 pt-4 mt-4">
                     <div className="flex justify-between items-center text-sm mb-2">
                       <span className="text-slate-400">Valor do orçamento:</span>
-                      <span className="text-white font-semibold">R$ {formatBRL(quote.total)}</span>
+                      <span className="text-white font-semibold">R$ {quote.total.toFixed(2)}</span>
                     </div>
                     {receipt.overtime_value > 0 && (
                       <div className="flex justify-between items-center text-sm mb-2">
                         <span className="text-green-400">+ Tempo excedente:</span>
-                        <span className="text-green-400 font-semibold">R$ {formatBRL(receipt.overtime_value)}</span>
+                        <span className="text-green-400 font-semibold">R$ {receipt.overtime_value.toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-slate-600">
                       <span className="text-white">Total do recibo:</span>
-                      <span className="text-green-400">R$ {formatBRL(receipt.final_total)}</span>
+                      <span className="text-green-400">R$ {receipt.final_total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
