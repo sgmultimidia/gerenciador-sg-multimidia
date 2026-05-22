@@ -377,147 +377,107 @@ class PDFGenerator {
   }
 
   generateReceiptPDF(data: ReceiptData): jsPDF {
-    this.addHeader('RECIBO', `#${data.receipt_number}`);
-    
-    // Date
-    this.doc.setFontSize(10);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setTextColor(100, 100, 100);
+    const doc = this.doc;
+    const W = this.pageWidth;
+    const margin = this.margin;
+    let y = margin;
+
+    // === HEADER ===
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('SG Multimídia', margin, y);
+    y += 6;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Estúdio de Produção Audiovisual', margin, y);
+    y += 5;
+    doc.text('São Pedro do Sul - RS | WhatsApp: (55) 9 9660-2449', margin, y);
+    y += 8;
+
+    // Divider
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.8);
+    doc.line(margin, y, W - margin, y);
+    y += 10;
+
+    // === TITLE ===
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('R E C I B O', W / 2, y, { align: 'center' });
+    y += 8;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
     const formattedDate = new Date(data.created_at).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
+      day: '2-digit', month: 'long', year: 'numeric',
     });
-    this.doc.text(`Data: ${formattedDate}`, this.margin, this.currentY);
-    this.currentY += 5;
+    doc.text(`Orçamento #${data.quote_number} — Data: ${formattedDate}`, W / 2, y, { align: 'center' });
+    y += 12;
+
+    // === RECEIPT TEXT ===
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+
+    const itemsText = data.items.map(item => item.name).join(', ');
+    const amountFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.total);
     
-    this.doc.setTextColor(this.secondaryColor[0], this.secondaryColor[1], this.secondaryColor[2]);
-    this.doc.text(`Orçamento: #${data.quote_number}`, this.margin, this.currentY);
-    this.currentY += 10;
+    // Convert number to words (simplified)
+    const receiptText = `Recebemos de ${data.client_name} a quantia de ${amountFormatted} referente a: ${itemsText}.`;
+    const maxWidth = W - margin * 2;
+    const splitText = doc.splitTextToSize(receiptText, maxWidth);
+    doc.text(splitText, margin, y);
+    y += splitText.length * 6 + 8;
+
+    // Legal text
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(80, 80, 80);
+    const legalText = 'Para maior clareza, firmamos o presente recibo para que produza os seus efeitos, dando plena, geral e irrevogável quitação pelo valor acima especificado.';
+    const splitLegal = doc.splitTextToSize(legalText, maxWidth);
+    doc.text(splitLegal, margin, y);
+    y += splitLegal.length * 5 + 15;
+
+    // === DATE AND SIGNATURE ===
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
     
-    // Client info
-    this.addClientInfo(data.client_name, data.client_whatsapp);
-    
-    // Items table
-    const tableData = data.items.map((item) => {
-      const rows: any[] = [
-        [
-          item.name,
-          item.type === 'service' ? 'Serviço' : 'Pacote',
-          this.formatCurrency(item.price),
-        ],
-      ];
-      
-      if (item.comboDetails && item.comboDetails.length > 0) {
-        item.comboDetails.forEach((detail) => {
-          rows.push([`  • ${detail}`, '', '']);
-        });
-      }
-      
-      if (item.displacement && item.displacement > 0) {
-        rows.push([
-          '  + Deslocamento',
-          '',
-          this.formatCurrency(item.displacement),
-        ]);
-      }
-      
-      return rows;
-    }).flat();
-    
-    autoTable(this.doc, {
-      startY: this.currentY,
-      head: [['Serviço/Produto', 'Tipo', 'Valor']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: {
-        fillColor: this.primaryColor,
-        textColor: 255,
-        fontSize: 11,
-        fontStyle: 'bold',
-      },
-      styles: {
-        fontSize: 10,
-        cellPadding: 4,
-      },
-      alternateRowStyles: {
-        fillColor: [245, 247, 250],
-      },
-      margin: { left: this.margin, right: this.margin },
-    });
-    
-    this.currentY = (this.doc as any).lastAutoTable.finalY + 10;
-    
-    // Totals
-    const totalsX = this.pageWidth - this.margin - 60;
-    
-    this.doc.setFontSize(11);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setTextColor(this.secondaryColor[0], this.secondaryColor[1], this.secondaryColor[2]);
-    this.doc.text('Subtotal:', totalsX, this.currentY);
-    this.doc.text(this.formatCurrency(data.subtotal), this.pageWidth - this.margin, this.currentY, { align: 'right' });
-    this.currentY += 6;
-    
-    if (data.discount_percentage > 0) {
-      this.doc.setTextColor(37, 99, 235);
-      this.doc.text(`Desconto (${data.discount_percentage}%):`, totalsX, this.currentY);
-      this.doc.text(
-        `-${this.formatCurrency((data.subtotal * data.discount_percentage) / 100)}`,
-        this.pageWidth - this.margin,
-        this.currentY,
-        { align: 'right' }
-      );
-      this.currentY += 6;
-    }
-    
-    if (data.discount_value && data.discount_value > 0) {
-      this.doc.setTextColor(37, 99, 235);
-      this.doc.text('Desconto (valor fixo):', totalsX, this.currentY);
-      this.doc.text(
-        `-${this.formatCurrency(data.discount_value)}`,
-        this.pageWidth - this.margin,
-        this.currentY,
-        { align: 'right' }
-      );
-      this.currentY += 6;
-    }
-    
-    if (data.overtime_minutes && data.overtime_minutes > 0) {
-      this.doc.setTextColor(200, 100, 0);
-      this.doc.text(`Hora extra (${data.overtime_minutes} min):`, totalsX, this.currentY);
-      this.doc.text(
-        `+${this.formatCurrency(data.overtime_value || 0)}`,
-        this.pageWidth - this.margin,
-        this.currentY,
-        { align: 'right' }
-      );
-      this.currentY += 6;
-    }
-    
-    // Total
-    this.doc.setFontSize(14);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setTextColor(this.primaryColor[0], this.primaryColor[1], this.primaryColor[2]);
-    this.doc.text('TOTAL:', totalsX, this.currentY);
-    this.doc.text(this.formatCurrency(data.final_total), this.pageWidth - this.margin, this.currentY, { align: 'right' });
-    
-    this.currentY += 15;
-    
-    // Payment confirmation text
-    this.doc.setFontSize(10);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setTextColor(this.secondaryColor[0], this.secondaryColor[1], this.secondaryColor[2]);
-    const receiptText = `Recebemos de ${data.client_name} a importância de ${this.formatCurrency(data.final_total)} referente aos serviços prestados conforme orçamento #${data.quote_number}.`;
-    const splitText = this.doc.splitTextToSize(receiptText, this.pageWidth - (2 * this.margin));
-    this.doc.text(splitText, this.margin, this.currentY);
-    
-    // Footer
-    this.addFooter(1, 1);
-    
+    const now = new Date();
+    const day = now.getDate();
+    const monthNames = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                       'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const dateText = `${now.toLocaleDateString('pt-BR', {day: '2-digit'})} de ${monthNames[now.getMonth()]} de ${now.getFullYear()}.`;
+    doc.text(dateText, margin, y);
+    y += 20;
+
+    // Signature line
+    doc.setDrawColor(30, 30, 30);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, margin + 80, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.text(data.client_name, margin, y);
+
+    // === FOOTER ===
+    const footerY = this.pageHeight - 15;
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin, footerY - 5, W - margin, footerY - 5);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text('SG Multimídia | sgmultimidiasps@gmail.com | São Pedro do Sul - RS', W / 2, footerY, { align: 'center' });
+
     return this.doc;
   }
 
-  generateContractPDF(data: ContractData): jsPDF {
+    generateContractPDF(data: ContractData): jsPDF {
     this.addHeader('CONTRATO', data.contract_number);
     
     // Date
