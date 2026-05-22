@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { X, FileText, DollarSign, History, Download, Plus, Trash2 } from 'lucide-react';
 import type { Client } from '@/shared/types';
 import { useToast } from './ToastContainer';
-import { useConfirm } from './ConfirmDialog';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
 import { generateReceiptPDF } from '@/react-app/utils/pdfGenerator';
 
@@ -14,7 +13,6 @@ interface MonthlyReceiptModalProps {
 
 export default function MonthlyReceiptModal({ isOpen, onClose, clients }: MonthlyReceiptModalProps) {
   const toast = useToast();
-  const confirm = useConfirm();
   useLockBodyScroll(isOpen, onClose);
 
   const [activeTab, setActiveTab] = useState<'avulso' | 'history'>('avulso');
@@ -102,14 +100,7 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
   };
 
   const deleteReceipt = async (receipt: any) => {
-    const confirmed = await confirm({
-      title: 'Excluir Recibo',
-      message: `Tem certeza que deseja excluir o recibo de ${receipt.client_name}? Esta ação não pode ser desfeita.`,
-      confirmText: 'Excluir',
-      cancelText: 'Cancelar',
-      type: 'danger',
-    });
-    if (!confirmed) return;
+    if (!window.confirm(`Excluir o recibo de ${receipt.client_name}? Esta ação não pode ser desfeita.`)) return;
 
     try {
       const res = await fetch(`/api/monthly-receipts/${receipt.id}`, { method: 'DELETE' });
