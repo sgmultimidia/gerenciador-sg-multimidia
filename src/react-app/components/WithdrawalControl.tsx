@@ -269,45 +269,38 @@ export function WithdrawalControl() {
         />
       </div>
 
-      {/* Stats Cards */}
-      <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600 space-y-2">
-        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Cálculo do Mês</p>
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-300">Faturamento bruto</span>
-            <span className="text-white font-semibold">R$ {monthlyRevenue.toFixed(2).replace('.', ',')}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-300">(-) DAS MEI</span>
-            <span className="text-red-400 font-semibold">- R$ {DAS_MEI.toFixed(2).replace('.', ',')}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-300">(-) Reserva ({reservePercentage}%)</span>
-            <span className="text-yellow-400 font-semibold">- R$ {reserveAmount.toFixed(2).replace('.', ',')}</span>
-          </div>
-          <div className="h-px bg-slate-600 my-1" />
-          <div className="flex justify-between text-sm">
-            <span className="text-green-300 font-semibold">Disponível para retirada</span>
-            <span className="text-green-400 font-bold">R$ {recommendedAmount.toFixed(2).replace('.', ',')}</span>
-          </div>
-        </div>
-      </div>
-
+      {/* Stats Cards - Grid 2x2 */}
       <div className="grid grid-cols-2 gap-2">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-3 text-white">
+          <div className="flex items-start justify-between mb-2">
+            <span className="text-[10px] opacity-90 leading-tight">Faturamento</span>
+            <TrendingUp className="w-3 h-3" />
+          </div>
+          <p className="text-base font-bold">R$ {monthlyRevenue.toFixed(2)}</p>
+        </div>
+
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3 text-white">
           <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Ainda disponível</span>
+            <span className="text-[10px] opacity-90 leading-tight">Disponível p/ retirada</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {availableAmount.toFixed(2).replace('.', ',')}</p>
+          <p className="text-base font-bold">R$ {recommendedAmount.toFixed(2)}</p>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-3 text-white">
+          <div className="flex items-start justify-between mb-2">
+            <span className="text-[10px] opacity-90 leading-tight">Ainda disponível</span>
+            <TrendingDown className="w-3 h-3" />
+          </div>
+          <p className="text-base font-bold">R$ {Math.max(0, availableAmount).toFixed(2)}</p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3 text-white">
           <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Já retirado</span>
+            <span className="text-[10px] opacity-90 leading-tight">Retirado</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {monthlyWithdrawn.toFixed(2).replace('.', ',')}</p>
+          <p className="text-base font-bold">R$ {monthlyWithdrawn.toFixed(2)}</p>
           <p className="text-[9px] opacity-75 mt-0.5">{percentageWithdrawn.toFixed(1)}%</p>
         </div>
       </div>
