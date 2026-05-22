@@ -107,7 +107,7 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
       message: `Tem certeza que deseja excluir o recibo de ${receipt.client_name}? Esta ação não pode ser desfeita.`,
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
-      variant: 'danger',
+      type: 'danger',
     });
     if (!confirmed) return;
 
