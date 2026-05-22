@@ -530,6 +530,17 @@ app.get("/api/monthly-receipts", async (c) => {
   }
 });
 
+// DELETE monthly receipt
+app.delete("/api/monthly-receipts/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    await c.env.DB.prepare("DELETE FROM monthly_receipts WHERE id = ?").bind(id).run();
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete receipt" }, 500);
+  }
+});
+
 app.post("/api/monthly-receipts", async (c) => {
   try {
     const body = await c.req.json();
