@@ -520,9 +520,10 @@ app.get("/api/monthly-receipts", async (c) => {
     let query = `SELECT mr.*, c.name as client_name, c.whatsapp as client_whatsapp
       FROM monthly_receipts mr 
       JOIN clients c ON mr.client_id = c.id`;
-    if (clientId) query += ` WHERE mr.client_id = ${clientId}`;
+    const params: any[] = [];
+    if (clientId) { query += ` WHERE mr.client_id = ?`; params.push(clientId); }
     query += ` ORDER BY mr.created_at DESC LIMIT 100`;
-    const result = await c.env.DB.prepare(query).all();
+    const result = await c.env.DB.prepare(query).bind(...params).all();
     return c.json(result.results || []);
   } catch (error) {
     return c.json({ error: "Failed to fetch receipts" }, 500);
@@ -1904,7 +1905,7 @@ app.get("/api/prospects", async (c) => {
   try {
     const status = c.req.query("status");
     let query = "SELECT * FROM prospects";
-    if (status) query += ` WHERE status = '${status}'`;
+    if (status) { query += ` WHERE status = ?`; }
     query += " ORDER BY created_at DESC";
     const result = await c.env.DB.prepare(query).all();
     return c.json(result.results || []);
@@ -1985,7 +1986,7 @@ app.get("/api/transmissions", async (c) => {
   try {
     const type = c.req.query("type");
     let query = "SELECT * FROM transmissions";
-    if (type) query += ` WHERE type = '${type}'`;
+    if (type) { query += ` WHERE type = ?`; }
     query += " ORDER BY transmission_date DESC";
     const result = await c.env.DB.prepare(query).all();
     return c.json(result.results || []);

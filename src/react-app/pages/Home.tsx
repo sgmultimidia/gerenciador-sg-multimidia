@@ -93,7 +93,9 @@ export default function HomeNew() {
   
 
   useEffect(() => {
-    Promise.all([loadClients(), loadServices()]);
+    Promise.all([loadClients(), loadServices()]).catch(() => {
+      console.error('Erro ao carregar dados iniciais');
+    });
   }, []);
 
   useEffect(() => {
