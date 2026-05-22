@@ -1279,7 +1279,12 @@ export default function HomeNew() {
           contract={selectedContract}
         />
       )}
-<GlobalSearch
+<ArchiveModal
+        isOpen={showArchive}
+        onClose={() => setShowArchive(false)}
+        clients={clients}
+      />
+      <GlobalSearch
         isOpen={showGlobalSearch}
         onClose={() => setShowGlobalSearch(false)}
         onNavigate={(type, id) => {
