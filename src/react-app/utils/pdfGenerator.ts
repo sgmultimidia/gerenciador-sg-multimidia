@@ -382,7 +382,6 @@ class PDFGenerator {
     const margin = this.margin;
     let y = margin;
 
-    // === HEADER ===
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 30, 30);
@@ -397,13 +396,11 @@ class PDFGenerator {
     doc.text('São Pedro do Sul - RS | WhatsApp: (55) 9 9660-2449', margin, y);
     y += 8;
 
-    // Divider
     doc.setDrawColor(37, 99, 235);
     doc.setLineWidth(0.8);
     doc.line(margin, y, W - margin, y);
     y += 10;
 
-    // === TITLE ===
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 30, 30);
@@ -419,22 +416,18 @@ class PDFGenerator {
     doc.text(`Orçamento #${data.quote_number} — Data: ${formattedDate}`, W / 2, y, { align: 'center' });
     y += 12;
 
-    // === RECEIPT TEXT ===
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(30, 30, 30);
 
-    const itemsText = data.items.map(item => item.name).join(', ');
+    const itemsText = data.items.map((item: any) => item.name).join(', ');
     const amountFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.total);
-    
-    // Convert number to words (simplified)
     const receiptText = `Recebemos de ${data.client_name} a quantia de ${amountFormatted} referente a: ${itemsText}.`;
     const maxWidth = W - margin * 2;
     const splitText = doc.splitTextToSize(receiptText, maxWidth);
     doc.text(splitText, margin, y);
     y += splitText.length * 6 + 8;
 
-    // Legal text
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(80, 80, 80);
@@ -443,20 +436,16 @@ class PDFGenerator {
     doc.text(splitLegal, margin, y);
     y += splitLegal.length * 5 + 15;
 
-    // === DATE AND SIGNATURE ===
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(30, 30, 30);
-    
-    const now = new Date();
-    const day = now.getDate();
     const monthNames = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
                        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-    const dateText = `${now.toLocaleDateString('pt-BR', {day: '2-digit'})} de ${monthNames[now.getMonth()]} de ${now.getFullYear()}.`;
+    const now = new Date();
+    const dateText = `${String(now.getDate()).padStart(2, '0')} de ${monthNames[now.getMonth()]} de ${now.getFullYear()}.`;
     doc.text(dateText, margin, y);
     y += 20;
 
-    // Signature line
     doc.setDrawColor(30, 30, 30);
     doc.setLineWidth(0.3);
     doc.line(margin, y, margin + 80, y);
@@ -464,7 +453,6 @@ class PDFGenerator {
     doc.setFontSize(9);
     doc.text(data.client_name, margin, y);
 
-    // === FOOTER ===
     const footerY = this.pageHeight - 15;
     doc.setDrawColor(37, 99, 235);
     doc.setLineWidth(0.5);
