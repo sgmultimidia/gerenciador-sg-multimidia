@@ -952,7 +952,7 @@ export default function HomeNew() {
         onDeleteClient={handleDeleteClient}
         formatCpfCnpj={formatCpfCnpj}
         onQuoteWhatsApp={(quote, client) => sendQuoteWhatsApp(quote, client)}
-        onQuotePDF={(quote, client) => {
+        onQuotePDF={async (quote, client) => {
           try {
             await generateQuotePDF({
               quote_number: quote.quote_number,
@@ -1038,7 +1038,7 @@ export default function HomeNew() {
             }
           }
         }}
-        onPDF={(quoteId: number) => {
+        onPDF={async (quoteId: number) => {
           const quote = universalSearchResults.find(q => q.id === quoteId);
           if (quote) {
             const client = clients.find(c => c.id === quote.client_id);
@@ -1234,7 +1234,7 @@ export default function HomeNew() {
         onWhatsApp={(quote: any, client: Client) => {
           sendQuoteWhatsApp(quote, client);
         }}
-        onPDF={(quote: any, client: Client) => {
+        onPDF={async (quote: any, client: Client) => {
           try {
             await generateQuotePDF({
               quote_number: quote.quote_number,
