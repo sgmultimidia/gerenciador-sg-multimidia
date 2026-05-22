@@ -275,20 +275,20 @@ export function WithdrawalControl() {
         <div className="space-y-1.5">
           <div className="flex justify-between text-sm">
             <span className="text-slate-300">Faturamento bruto</span>
-            <span className="text-white font-semibold">R$ {monthlyRevenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+            <span className="text-white font-semibold">R$ {monthlyRevenue.toFixed(2).replace('.', ',')}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-300">(-) DAS MEI</span>
-            <span className="text-red-400 font-semibold">- R$ {DAS_MEI.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+            <span className="text-red-400 font-semibold">- R$ {DAS_MEI.toFixed(2).replace('.', ',')}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-300">(-) Reserva ({reservePercentage}%)</span>
-            <span className="text-yellow-400 font-semibold">- R$ {reserveAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+            <span className="text-yellow-400 font-semibold">- R$ {reserveAmount.toFixed(2).replace('.', ',')}</span>
           </div>
           <div className="h-px bg-slate-600 my-1" />
           <div className="flex justify-between text-sm">
             <span className="text-green-300 font-semibold">Disponível para retirada</span>
-            <span className="text-green-400 font-bold">R$ {recommendedAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+            <span className="text-green-400 font-bold">R$ {recommendedAmount.toFixed(2).replace('.', ',')}</span>
           </div>
         </div>
       </div>
@@ -299,7 +299,7 @@ export function WithdrawalControl() {
             <span className="text-[10px] opacity-90 leading-tight">Ainda disponível</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {availableAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+          <p className="text-base font-bold">R$ {availableAmount.toFixed(2).replace('.', ',')}</p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3 text-white">
@@ -307,7 +307,7 @@ export function WithdrawalControl() {
             <span className="text-[10px] opacity-90 leading-tight">Já retirado</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {monthlyWithdrawn.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+          <p className="text-base font-bold">R$ {monthlyWithdrawn.toFixed(2).replace('.', ',')}</p>
           <p className="text-[9px] opacity-75 mt-0.5">{percentageWithdrawn.toFixed(1)}%</p>
         </div>
       </div>
@@ -550,6 +550,5 @@ export function WithdrawalControl() {
         </div>
       )}
     </div>
-  </div>
   );
 }
