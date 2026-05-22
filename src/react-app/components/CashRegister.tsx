@@ -267,22 +267,22 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
         {/* ✅ Corpo do modal: ÚNICO SCROLL */}
         <div className="flex-1 min-h-0 overflow-y-auto">
           {/* Balance Cards */}
-          <div className="p-3 border-b border-slate-700">
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-lg p-3">
+          <div className="p-6 border-b border-slate-700">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-green-300 text-xs font-semibold uppercase tracking-wide">Entradas</span>
+                  <span className="text-green-300 text-sm font-semibold uppercase tracking-wide">Entradas</span>
                   <TrendingUp className="w-5 h-5 text-green-400" />
                 </div>
-                <p className="text-sm font-bold text-green-400 break-all">R$ {balance.income.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-green-400">R$ {balance.income.toFixed(2)}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 rounded-lg p-3">
+              <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/30 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-red-300 text-xs font-semibold uppercase tracking-wide">Saídas</span>
+                  <span className="text-red-300 text-sm font-semibold uppercase tracking-wide">Saídas</span>
                   <TrendingDown className="w-5 h-5 text-red-400" />
                 </div>
-                <p className="text-sm font-bold text-red-400 break-all">R$ {balance.expense.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-red-400">R$ {balance.expense.toFixed(2)}</p>
               </div>
 
               <div className={`bg-gradient-to-br ${balance.balance >= 0 ? 'from-blue-500/20 to-blue-600/10 border-blue-500/30' : 'from-orange-500/20 to-orange-600/10 border-orange-500/30'} border rounded-lg p-4`}>
@@ -290,7 +290,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
                   <span className={`${balance.balance >= 0 ? 'text-blue-300' : 'text-orange-300'} text-sm font-semibold uppercase tracking-wide`}>Saldo</span>
                   <DollarSign className={`w-5 h-5 ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`} />
                 </div>
-                <p className={`text-sm font-bold ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>R$ {balance.balance.toFixed(2)}</p>
+                <p className={`text-3xl font-bold ${balance.balance >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>R$ {balance.balance.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
           {/* Actions Bar */}
           <div className="p-4 border-b border-slate-700 flex flex-wrap gap-3">
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => { resetForm(); setShowForm(true); }}
               className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-green-500/50 flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
@@ -342,124 +342,6 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
               />
             </div>
           </div>
-
-          {/* Form */}
-          {showForm && (
-            <div className="p-6 border-b border-slate-700 bg-slate-700/30">
-              <h4 className="text-lg font-bold text-white mb-4">
-                {editingTransaction ? 'Editar Transação' : 'Nova Transação'}
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-blue-300 mb-2">Tipo *</label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setType('income')}
-                      className={`flex-1 px-4 py-2 rounded-md font-semibold transition-all ${
-                        type === 'income' ? 'bg-green-600 text-white' : 'bg-slate-600 text-slate-300'
-                      }`}
-                    >
-                      Entrada
-                    </button>
-                    <button
-                      onClick={() => setType('expense')}
-                      className={`flex-1 px-4 py-2 rounded-md font-semibold transition-all ${
-                        type === 'expense' ? 'bg-red-600 text-white' : 'bg-slate-600 text-slate-300'
-                      }`}
-                    >
-                      Saída
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-blue-300 mb-2">Valor (R$) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full px-4 py-2 rounded-md bg-slate-600 text-white border border-slate-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-blue-300 mb-2">Descrição *</label>
-                  <input
-                    type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-2 rounded-md bg-slate-600 text-white border border-slate-500"
-                    placeholder="Descrição da transação"
-                  />
-                </div>
-
-                <Select
-                  label="Categoria"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="py-2"
-                >
-                  <option value="">Selecione...</option>
-                  {(type === 'income' ? incomeCategories : expenseCategories).map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </Select>
-
-                <Select
-                  label="Cliente"
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  className="py-2"
-                >
-                  <option value="">Nenhum</option>
-                  {clients.map(client => (
-                    <option key={client.id} value={client.id}>{client.name}</option>
-                  ))}
-                </Select>
-
-                <Select
-                  label="Forma de Pagamento"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="py-2"
-                >
-                  <option value="">Selecione...</option>
-                  {paymentMethods.map(method => (
-                    <option key={method} value={method}>{method}</option>
-                  ))}
-                </Select>
-
-                <div>
-                  <label className="block text-sm font-semibold text-blue-300 mb-2">Data *</label>
-                  <input
-                    type="date"
-                    value={transactionDate}
-                    onChange={(e) => setTransactionDate(e.target.value)}
-                    className="w-full px-4 py-2 rounded-md bg-slate-600 text-white border border-slate-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={resetForm}
-                  className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-semibold transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg font-semibold transition-all"
-                >
-                  {loading ? 'Salvando...' : editingTransaction ? 'Atualizar' : 'Salvar'}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Transactions List */}
           <div className="p-6">
@@ -545,6 +427,137 @@ export default function CashRegister({ isOpen, onClose, clients }: CashRegisterP
           <div className="h-4" />
         </div>
       </div>
+
+      {/* Transaction Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-slate-800 rounded-lg w-full max-w-lg shadow-2xl border border-green-500/30 flex flex-col">
+            <div className="bg-gradient-to-r from-green-900 to-teal-900 p-5 border-b border-green-500/30 flex justify-between items-center flex-shrink-0">
+              <div>
+                <h3 className="text-xl font-bold text-white">
+                  {editingTransaction ? 'Editar Transação' : 'Nova Transação'}
+                </h3>
+                <p className="text-green-200 text-sm mt-0.5">
+                  {editingTransaction ? 'Atualize os dados da transação' : 'Registre uma nova entrada ou saída'}
+                </p>
+              </div>
+              <button
+                onClick={resetForm}
+                className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 overflow-y-auto flex-1">
+              <div>
+                <label className="block text-sm font-semibold text-slate-300 mb-2">Tipo *</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setType('income')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                      type === 'income' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    Entrada
+                  </button>
+                  <button
+                    onClick={() => setType('expense')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                      type === 'expense' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    Saída
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">Valor (R$) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="0,00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">Data *</label>
+                  <input
+                    type="date"
+                    value={transactionDate}
+                    onChange={(e) => setTransactionDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-300 mb-2">Descrição *</label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Descrição da transação"
+                />
+              </div>
+
+              <Select
+                label="Categoria"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">Selecione...</option>
+                {(type === 'income' ? incomeCategories : expenseCategories).map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Cliente"
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+              >
+                <option value="">Nenhum</option>
+                {clients.map(client => (
+                  <option key={client.id} value={client.id}>{client.name}</option>
+                ))}
+              </Select>
+
+              <Select
+                label="Forma de Pagamento"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                <option value="">Selecione...</option>
+                {paymentMethods.map(method => (
+                  <option key={method} value={method}>{method}</option>
+                ))}
+              </Select>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={resetForm}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg font-semibold transition-all"
+                >
+                  {loading ? 'Salvando...' : editingTransaction ? 'Atualizar' : 'Salvar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
