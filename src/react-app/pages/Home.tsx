@@ -954,7 +954,7 @@ export default function HomeNew() {
         onQuoteWhatsApp={(quote, client) => sendQuoteWhatsApp(quote, client)}
         onQuotePDF={(quote, client) => {
           try {
-            generateQuotePDF({
+            await generateQuotePDF({
               quote_number: quote.quote_number,
               client_name: client.name,
               client_whatsapp: client.whatsapp,
@@ -1044,7 +1044,7 @@ export default function HomeNew() {
             const client = clients.find(c => c.id === quote.client_id);
             if (client) {
               try {
-                generateQuotePDF({
+                await generateQuotePDF({
                   quote_number: quote.quote_number,
                   client_name: client.name,
                   client_whatsapp: client.whatsapp,
@@ -1236,7 +1236,7 @@ export default function HomeNew() {
         }}
         onPDF={(quote: any, client: Client) => {
           try {
-            generateQuotePDF({
+            await generateQuotePDF({
               quote_number: quote.quote_number,
               client_name: client.name,
               client_whatsapp: client.whatsapp,
