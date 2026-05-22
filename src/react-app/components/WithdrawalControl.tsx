@@ -292,7 +292,6 @@ export function WithdrawalControl() {
           </div>
         </div>
       </div>
-      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3 text-white">
@@ -551,5 +550,6 @@ export function WithdrawalControl() {
         </div>
       )}
     </div>
+  </div>
   );
 }
