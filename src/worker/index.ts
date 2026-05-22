@@ -512,6 +512,23 @@ app.get("/api/receipts/quote/:quoteId", async (c) => {
 });
 
 // POST create monthly receipt
+
+// GET monthly receipts history
+app.get("/api/monthly-receipts", async (c) => {
+  try {
+    const clientId = c.req.query("client_id");
+    let query = `SELECT mr.*, c.name as client_name 
+      FROM monthly_receipts mr 
+      JOIN clients c ON mr.client_id = c.id`;
+    if (clientId) query += ` WHERE mr.client_id = ${clientId}`;
+    query += ` ORDER BY mr.created_at DESC LIMIT 100`;
+    const result = await c.env.DB.prepare(query).all();
+    return c.json(result.results || []);
+  } catch (error) {
+    return c.json({ error: "Failed to fetch receipts" }, 500);
+  }
+});
+
 app.post("/api/monthly-receipts", async (c) => {
   try {
     const body = await c.req.json();

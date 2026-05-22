@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, FileText, Calendar, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, FileText, Calendar, DollarSign, History, Download, ChevronDown } from 'lucide-react';
 import type { Client } from '@/shared/types';
 import { useToast } from './ToastContainer';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
@@ -28,6 +28,10 @@ export default function MonthlyReceiptModal({
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
+  const [receipts, setReceipts] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [filterClient, setFilterClient] = useState('');
 
   if (!isOpen) return null;
 
@@ -124,7 +128,7 @@ export default function MonthlyReceiptModal({
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-slate-800 rounded-lg shadow-2xl border border-green-500/30 max-w-2xl w-full my-8 flex flex-col">
-        <div className="bg-gradient-to-r from-green-900 to-emerald-900 border-b border-green-500/30 p-6 flex justify-between items-center flex-shrink-0">
+        <div className="bg-slate-800 border-b border-green-500/30 p-6 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <FileText className="w-8 h-8 text-green-400" />
             <div>
@@ -229,6 +233,60 @@ export default function MonthlyReceiptModal({
               {loading ? 'Gerando...' : 'Gerar Recibo'}
             </button>
           </div>
+          </div>
+          )}
+
+          {activeTab === 'history' && (
+            <div className="p-5">
+              <div className="mb-4">
+                <select
+                  value={filterClient}
+                  onChange={(e) => setFilterClient(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                >
+                  <option value="">Todos os clientes</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {loadingHistory ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500" />
+                </div>
+              ) : receipts.length === 0 ? (
+                <div className="text-center py-10 text-slate-400">
+                  <History className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Nenhum recibo encontrado</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {receipts.map((receipt) => (
+                    <div key={receipt.id} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-semibold text-sm truncate">{receipt.client_name}</p>
+                          <p className="text-slate-400 text-xs mt-0.5">{receipt.description}</p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-green-400 font-bold text-sm">
+                              R$ {Number(receipt.amount).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                            </span>
+                            <span className="text-slate-500 text-xs">
+                              {new Date(receipt.month_reference + '-01').toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'})}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-slate-500 text-xs flex-shrink-0">
+                          {new Date(receipt.created_at).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
