@@ -2059,6 +2059,117 @@ app.delete("/api/transmissions/:id", async (c) => {
 });
 
 
+
+// ==================== ARQUIVO DIGITAL ====================
+
+// GET - List archive files
+app.get("/api/archive", async (c) => {
+  try {
+    const clientId = c.req.query("client_id");
+    const docType = c.req.query("document_type");
+    let query = "SELECT * FROM archive_files WHERE 1=1";
+    const params: any[] = [];
+    if (clientId) { query += " AND client_id = ?"; params.push(clientId); }
+    if (docType) { query += " AND document_type = ?"; params.push(docType); }
+    query += " ORDER BY created_at DESC";
+    const result = await c.env.DB.prepare(query).bind(...params).all();
+    return c.json(result.results || []);
+  } catch (error) {
+    return c.json({ error: "Failed to fetch archive" }, 500);
+  }
+});
+
+// POST - Upload file to archive
+app.post("/api/archive", async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const file = formData.get("file") as File;
+    const documentType = formData.get("document_type") as string || "outros";
+    const clientId = formData.get("client_id") as string || null;
+    const clientName = formData.get("client_name") as string || null;
+    const notes = formData.get("notes") as string || null;
+
+    if (!file) return c.json({ error: "No file provided" }, 400);
+
+    const timestamp = Date.now();
+    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const r2Key = `archive/${documentType}/${timestamp}_${sanitizedFilename}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    await c.env.R2_BUCKET.put(r2Key, arrayBuffer, {
+      httpMetadata: { contentType: file.type }
+    });
+
+    const result = await c.env.DB.prepare(
+      "INSERT INTO archive_files (filename, original_filename, file_type, file_size, r2_key, document_type, client_id, client_name, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(sanitizedFilename, file.name, file.type, file.size, r2Key, documentType, clientId, clientName, notes).run();
+
+    return c.json({ id: result.meta.last_row_id, success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to upload file" }, 500);
+  }
+});
+
+// POST - Archive a PDF blob (from generated PDFs)
+app.post("/api/archive/blob", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { filename, file_type, file_size, document_type, client_id, client_name, notes, data } = body;
+
+    const r2Key = `archive/${document_type}/${Date.now()}_${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const binaryData = Uint8Array.from(atob(data), c => c.charCodeAt(0));
+
+    await c.env.R2_BUCKET.put(r2Key, binaryData, {
+      httpMetadata: { contentType: file_type }
+    });
+
+    const result = await c.env.DB.prepare(
+      "INSERT INTO archive_files (filename, original_filename, file_type, file_size, r2_key, document_type, client_id, client_name, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(filename, filename, file_type, file_size, r2Key, document_type, client_id || null, client_name || null, notes || null).run();
+
+    return c.json({ id: result.meta.last_row_id, success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to archive blob" }, 500);
+  }
+});
+
+// GET - Download archive file
+app.get("/api/archive/:id/download", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const file = await c.env.DB.prepare("SELECT * FROM archive_files WHERE id = ?").bind(id).first() as any;
+    if (!file) return c.json({ error: "File not found" }, 404);
+
+    const object = await c.env.R2_BUCKET.get(file.r2_key);
+    if (!object) return c.json({ error: "File not found in storage" }, 404);
+
+    return new Response(object.body, {
+      headers: {
+        "Content-Type": file.file_type,
+        "Content-Disposition": `attachment; filename="${file.original_filename}"`,
+      }
+    });
+  } catch (error) {
+    return c.json({ error: "Failed to download file" }, 500);
+  }
+});
+
+// DELETE - Delete archive file
+app.delete("/api/archive/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const file = await c.env.DB.prepare("SELECT r2_key FROM archive_files WHERE id = ?").bind(id).first() as any;
+    if (!file) return c.json({ error: "File not found" }, 404);
+
+    await c.env.R2_BUCKET.delete(file.r2_key);
+    await c.env.DB.prepare("DELETE FROM archive_files WHERE id = ?").bind(id).run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to delete file" }, 500);
+  }
+});
+
 // ==================== GLOBAL SEARCH ====================
 
 app.get("/api/search", async (c) => {

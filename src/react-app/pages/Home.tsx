@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, DollarSign, Calendar, 
-  FileText, FolderKanban, Plus, Settings, RefreshCw, Search
+  FileText, FolderKanban, Plus, Settings, RefreshCw, Search, FolderOpen
 } from 'lucide-react';
 import type { Client, Service } from '@/shared/types';
 import { useToast } from '@/react-app/components/ToastContainer';
@@ -32,6 +32,7 @@ import RecurringProjects from '@/react-app/components/RecurringProjects';
 import Prospects from '@/react-app/components/Prospects';
 import Transmissions from '@/react-app/components/Transmissions';
 import GlobalSearch from '@/react-app/components/GlobalSearch';
+import ArchiveModal from '@/react-app/components/ArchiveModal';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
 
 export default function HomeNew() {
@@ -57,6 +58,7 @@ export default function HomeNew() {
   const [showProspects, setShowProspects] = useState(false);
   const [showTransmissions, setShowTransmissions] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
   const [showMonthlyReceipt, setShowMonthlyReceipt] = useState(false);
   const [showWithdrawalControl, setShowWithdrawalControl] = useState(false);
   const [showQuoteWizard, setShowQuoteWizard] = useState(false);
@@ -701,8 +703,17 @@ export default function HomeNew() {
               whileHover={{ scale: 1.01 }}
               whileTap={tapScale}
             >
-              <span className="text-sm font-medium text-white">Recibos Mensais</span>
+              <span className="text-sm font-medium text-white">Recibos</span>
               <FileText className="w-4 h-4 text-slate-400 group-hover:text-green-400" />
+            </motion.button>
+            <motion.button
+              onClick={() => setShowArchive(true)}
+              className="w-full px-4 py-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg text-left transition-all border border-slate-600/50 hover:border-purple-500/50 flex items-center justify-between group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={tapScale}
+            >
+              <span className="text-sm font-medium text-white">Arquivo Digital</span>
+              <FolderOpen className="w-4 h-4 text-slate-400 group-hover:text-purple-400" />
             </motion.button>
           </div>
         </motion.div>
