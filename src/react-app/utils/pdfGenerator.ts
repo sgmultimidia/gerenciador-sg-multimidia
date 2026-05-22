@@ -347,6 +347,7 @@ class PDFGenerator {
   }
 
   generateReceiptPDF(data: ReceiptData): jsPDF {
+  generateReceiptPDF(data: ReceiptData): jsPDF {
     const doc = this.doc;
     const W = this.pageWidth;
     const margin = this.margin;
@@ -592,6 +593,175 @@ export function generateReceiptPDF(data: ReceiptData): void {
   const generator = new PDFGenerator();
   const pdf = generator.generateReceiptPDF(data);
   pdf.save(`Recibo_${data.receipt_number}.pdf`);
+}
+
+export function generateContractPDF(data: ContractData): void {
+  const generator = new PDFGenerator();
+  const pdf = generator.generateContractPDF(data);
+  pdf.save(`Contrato_${data.contract_number}.pdf`);
+}
+
+export function generateFinancialReportPDF(data: FinancialReportData): void {
+  const generator = new PDFGenerator();
+  const pdf = generator.generateFinancialReportPDF(data);
+  pdf.save(`Relatorio_Financeiro_${data.period.replace(/\//g, '-')}.pdf`);
+}
+
+interface MonthlyReceiptData {
+  client_name: string;
+  client_whatsapp?: string;
+  amount: number;
+  description: string;
+  month_reference: string;
+  created_at: string;
+}
+
+export function generateMonthlyReceiptPDF(data: MonthlyReceiptData): void {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  let y = margin;
+
+  // Outer border
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.rect(margin - 5, margin - 5, W - (margin - 5) * 2, 190, 'S');
+
+  // Header
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 0, 0);
+  doc.text('SG Multimídia', margin, y);
+  y += 5;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Estúdio de Produção Audiovisual', margin, y);
+  y += 4;
+  doc.text('São Pedro do Sul - RS | WhatsApp: (55) 9 9660-2449', margin, y);
+  y += 6;
+
+  doc.setLineWidth(0.3);
+  doc.line(margin - 5, y, W - margin + 5, y);
+  y += 10;
+
+  // Title
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 0, 0);
+  doc.text('R E C I B O', W / 2, y, { align: 'center' });
+  y += 7;
+
+  // Month reference
+  const [year, month] = data.month_reference.split('-');
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const monthName = monthNames[parseInt(month) - 1];
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Referente ao mês de ${monthName} de ${year}`, W / 2, y, { align: 'center' });
+  y += 14;
+
+  // "Recebemos de CLIENT"
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(0, 0, 0);
+  doc.text('Recebemos de ', margin, y);
+  const recebeW = doc.getTextWidth('Recebemos de ');
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.client_name, margin + recebeW, y);
+  const nameW = doc.getTextWidth(data.client_name);
+  doc.setLineWidth(0.3);
+  doc.line(margin + recebeW, y + 1, margin + recebeW + nameW, y + 1);
+  y += 10;
+
+  // "a quantia de VALUE (extenso)"
+  const amountFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.amount);
+
+  // Simple extenso function inline
+  const numeroParaExtenso = (valor: number): string => {
+    const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove',
+                      'dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+    const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+    const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos',
+                      'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+    if (valor === 0) return 'zero';
+    const inteiro = Math.floor(valor);
+    const centavos = Math.round((valor - inteiro) * 100);
+    const converterCentena = (n: number): string => {
+      if (n === 0) return '';
+      const c = Math.floor(n / 100);
+      const d = Math.floor((n % 100) / 10);
+      const u = n % 10;
+      const parts: string[] = [];
+      if (c > 0) parts.push(n === 100 ? 'cem' : centenas[c]);
+      if (d >= 2) { parts.push(dezenas[d]); if (u > 0) parts.push(unidades[u]); }
+      else if (d === 1 || (d === 0 && u > 0)) { parts.push(unidades[d * 10 + u]); }
+      return parts.join(' e ');
+    };
+    const partes: string[] = [];
+    if (inteiro >= 1000) {
+      const mil = Math.floor(inteiro / 1000);
+      const resto = inteiro % 1000;
+      partes.push(mil === 1 ? 'mil' : `${converterCentena(mil)} mil`);
+      if (resto > 0) partes.push(converterCentena(resto));
+    } else if (inteiro > 0) { partes.push(converterCentena(inteiro)); }
+    const valorInteiro = inteiro === 1 ? `${partes.join(' e ')} real` : `${partes.join(' e ')} reais`;
+    if (centavos > 0) {
+      const centavoTexto = centavos === 1 ? `${unidades[centavos]} centavo` : `${converterCentena(centavos)} centavos`;
+      if (inteiro === 0) return centavoTexto;
+      return `${valorInteiro} e ${centavoTexto}`;
+    }
+    return valorInteiro;
+  };
+
+  const amountExtenso = numeroParaExtenso(data.amount);
+  doc.setFont('helvetica', 'normal');
+  doc.text('a quantia de  ', margin, y);
+  const quantiaW = doc.getTextWidth('a quantia de  ');
+  doc.setFont('helvetica', 'bold');
+  doc.text(amountFormatted, margin + quantiaW, y);
+  const amountW = doc.getTextWidth(amountFormatted);
+  doc.line(margin + quantiaW, y + 1, margin + quantiaW + amountW, y + 1);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`  (${amountExtenso}),`, margin + quantiaW + amountW, y);
+  y += 10;
+
+  // "referente a: DESCRIPTION"
+  doc.text('referente a: ', margin, y);
+  const refW = doc.getTextWidth('referente a: ');
+  doc.setFont('helvetica', 'bold');
+  const maxWidth = W - margin * 2;
+  const splitDesc = doc.splitTextToSize(data.description, maxWidth - refW);
+  doc.text(splitDesc[0], margin + refW, y);
+  y += splitDesc.length * 6 + 8;
+
+  // Legal text
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  const legalText = 'Para maior clareza, firmamos o presente recibo para que produza os seus efeitos, dando plena, geral e irrevogável quitação pelo valor acima especificado.';
+  const splitLegal = doc.splitTextToSize(legalText, maxWidth);
+  doc.text(splitLegal, margin, y);
+  y += splitLegal.length * 5 + 14;
+
+  // Date right-aligned
+  const monthNamesLower = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                           'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const now = new Date();
+  const dateText = `${String(now.getDate()).padStart(2, '0')} de ${monthNamesLower[now.getMonth()]} de ${now.getFullYear()}.`;
+  doc.text(dateText, W - margin, y, { align: 'right' });
+  y += 20;
+
+  // Signature line centered
+  const lineX = W / 2;
+  doc.setLineWidth(0.3);
+  doc.line(lineX - 45, y, lineX + 45, y);
+  y += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text(data.client_name, lineX, y, { align: 'center' });
+
+  doc.save(`Recibo_Mensal_${data.client_name.replace(/ /g, '_')}.pdf`);
 }
 
 export function generateContractPDF(data: ContractData): void {
