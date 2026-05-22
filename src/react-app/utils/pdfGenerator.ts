@@ -347,7 +347,6 @@ class PDFGenerator {
   }
 
   generateReceiptPDF(data: ReceiptData): jsPDF {
-  generateReceiptPDF(data: ReceiptData): jsPDF {
     const doc = this.doc;
     const W = this.pageWidth;
     const margin = this.margin;
