@@ -179,193 +179,120 @@ class PDFGenerator {
   }
 
   generateQuotePDF(data: QuoteData): jsPDF {
-    const doc = this.doc;
-    const W = this.pageWidth;
-    const H = this.pageHeight;
-
-    // === BACKGROUND ===
-    doc.setFillColor(15, 23, 42); // slate-950
-    doc.rect(0, 0, W, H, 'F');
-
-    // === HEADER BAR ===
-    doc.setFillColor(30, 41, 59); // slate-800
-    doc.rect(0, 0, W, 45, 'F');
-
-    // Accent line
-    doc.setFillColor(99, 102, 241); // indigo-500
-    doc.rect(0, 0, W, 2, 'F');
-
-    // Company name
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.text('SG Multimídia', this.margin, 15);
-
-    doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184); // slate-400
-    doc.text('sgmultimidiasps@gmail.com  |  São Pedro do Sul - RS', this.margin, 21);
-
-    // Document title
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('ORÇAMENTO', W - this.margin, 14, { align: 'right' });
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(99, 102, 241); // indigo-400
-    doc.text(`#${data.quote_number}`, W - this.margin, 22, { align: 'right' });
-
+    this.addHeader('ORÇAMENTO', `#${data.quote_number}`);
+    
+    // Date
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(100, 100, 100);
     const formattedDate = new Date(data.created_at).toLocaleDateString('pt-BR', {
-      day: '2-digit', month: 'long', year: 'numeric',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
     });
-    doc.setFontSize(8);
-    doc.setTextColor(148, 163, 184);
-    doc.text(`Data: ${formattedDate}`, W - this.margin, 29, { align: 'right' });
-
-    // === CLIENT INFO CARD ===
-    let y = 55;
-    doc.setFillColor(30, 41, 59); // slate-800
-    doc.roundedRect(this.margin, y, W - this.margin * 2, 28, 2, 2, 'F');
-
-    doc.setFillColor(99, 102, 241);
-    doc.rect(this.margin, y, 3, 28, 'F');
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(148, 163, 184);
-    doc.text('CLIENTE', this.margin + 8, y + 8);
-
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text(data.client_name, this.margin + 8, y + 16);
-
-    const contactParts = [];
-    if (data.client_whatsapp) contactParts.push(`WhatsApp: ${data.client_whatsapp}`);
-    if (data.client_email) contactParts.push(data.client_email);
-    if (contactParts.length > 0) {
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(148, 163, 184);
-      doc.text(contactParts.join('  |  '), this.margin + 8, y + 23);
-    }
-
-    y += 36;
-
-    // === ITEMS ===
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(148, 163, 184);
-    doc.text('SERVIÇOS / PACOTES', this.margin, y);
-    y += 5;
-
-    // Table header
-    doc.setFillColor(30, 41, 59);
-    doc.rect(this.margin, y, W - this.margin * 2, 8, 'F');
-    doc.setFillColor(99, 102, 241);
-    doc.rect(this.margin, y, W - this.margin * 2, 1, 'F');
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(148, 163, 184);
-    doc.text('DESCRIÇÃO', this.margin + 4, y + 5);
-    doc.text('TIPO', W - this.margin - 50, y + 5);
-    doc.text('VALOR', W - this.margin - 4, y + 5, { align: 'right' });
-    y += 9;
-
-    // Table rows
-    data.items.forEach((item, idx) => {
-      const rowH = item.comboDetails && item.comboDetails.length > 0 ? 8 + item.comboDetails.length * 5 : 10;
+    this.doc.text(`Data: ${formattedDate}`, this.margin, this.currentY);
+    this.currentY += 10;
+    
+    // Client info
+    this.addClientInfo(data.client_name, data.client_whatsapp, data.client_email);
+    
+    // Items table
+    const tableData = data.items.map((item) => {
+      const rows: any[] = [
+        [
+          item.name,
+          item.type === 'service' ? 'Serviço' : 'Pacote',
+          this.formatCurrency(item.price),
+        ],
+      ];
       
-      if (idx % 2 === 0) {
-        doc.setFillColor(22, 33, 51);
-        doc.rect(this.margin, y, W - this.margin * 2, rowH, 'F');
-      }
-
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      const itemName = doc.splitTextToSize(item.name, W - this.margin * 2 - 70);
-      doc.text(itemName[0], this.margin + 4, y + 6);
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(148, 163, 184);
-      doc.text(item.type === 'service' ? 'Serviço' : 'Pacote', W - this.margin - 50, y + 6);
-
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(99, 102, 241);
-      doc.text(this.formatCurrency(item.price), W - this.margin - 4, y + 6, { align: 'right' });
-
+      // Add combo details
       if (item.comboDetails && item.comboDetails.length > 0) {
-        let detailY = y + 11;
         item.comboDetails.forEach((detail) => {
-          doc.setFontSize(7);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text(`• ${detail}`, this.margin + 8, detailY);
-          detailY += 5;
+          rows.push([`  • ${detail}`, '', '']);
         });
       }
-
-      y += rowH;
+      
+      // Add displacement
+      if (item.displacement && item.displacement > 0) {
+        rows.push([
+          '  + Deslocamento',
+          '',
+          this.formatCurrency(item.displacement),
+        ]);
+      }
+      
+      return rows;
+    }).flat();
+    
+    autoTable(this.doc, {
+      startY: this.currentY,
+      head: [['Serviço/Produto', 'Tipo', 'Valor']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: {
+        fillColor: this.primaryColor,
+        textColor: 255,
+        fontSize: 11,
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 4,
+      },
+      alternateRowStyles: {
+        fillColor: [245, 247, 250],
+      },
+      margin: { left: this.margin, right: this.margin },
     });
-
-    // Bottom line
-    doc.setFillColor(99, 102, 241);
-    doc.rect(this.margin, y, W - this.margin * 2, 0.5, 'F');
-    y += 8;
-
-    // === TOTALS ===
-    const totalsX = W - this.margin - 70;
-
-    if (data.subtotal !== data.total) {
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(148, 163, 184);
-      doc.text('Subtotal:', totalsX, y);
-      doc.text(this.formatCurrency(data.subtotal), W - this.margin, y, { align: 'right' });
-      y += 7;
-
-      if (data.discount_percentage > 0) {
-        doc.setTextColor(52, 211, 153); // green
-        doc.text(`Desconto (${data.discount_percentage}%):`, totalsX, y);
-        doc.text(`-${this.formatCurrency((data.subtotal * data.discount_percentage) / 100)}`, W - this.margin, y, { align: 'right' });
-        y += 7;
-      }
-      if (data.discount_value && data.discount_value > 0) {
-        doc.setTextColor(52, 211, 153);
-        doc.text('Desconto:', totalsX, y);
-        doc.text(`-${this.formatCurrency(data.discount_value)}`, W - this.margin, y, { align: 'right' });
-        y += 7;
-      }
+    
+    // Get final Y position after table
+    this.currentY = (this.doc as any).lastAutoTable.finalY + 10;
+    
+    // Totals
+    const totalsX = this.pageWidth - this.margin - 60;
+    
+    this.doc.setFontSize(11);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(this.secondaryColor[0], this.secondaryColor[1], this.secondaryColor[2]);
+    this.doc.text('Subtotal:', totalsX, this.currentY);
+    this.doc.text(this.formatCurrency(data.subtotal), this.pageWidth - this.margin, this.currentY, { align: 'right' });
+    this.currentY += 6;
+    
+    if (data.discount_percentage > 0) {
+      this.doc.setTextColor(37, 99, 235);
+      this.doc.text(`Desconto (${data.discount_percentage}%):`, totalsX, this.currentY);
+      this.doc.text(
+        `-${this.formatCurrency((data.subtotal * data.discount_percentage) / 100)}`,
+        this.pageWidth - this.margin,
+        this.currentY,
+        { align: 'right' }
+      );
+      this.currentY += 6;
     }
-
-    // Total box
-    doc.setFillColor(30, 41, 59);
-    doc.roundedRect(totalsX - 4, y - 3, W - this.margin - totalsX + 4, 12, 1, 1, 'F');
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('TOTAL:', totalsX, y + 6);
-    doc.setTextColor(99, 102, 241);
-    doc.text(this.formatCurrency(data.total), W - this.margin - 2, y + 6, { align: 'right' });
-    y += 20;
-
-    // === FOOTER ===
-    doc.setFillColor(30, 41, 59);
-    doc.rect(0, H - 18, W, 18, 'F');
-    doc.setFillColor(99, 102, 241);
-    doc.rect(0, H - 18, W, 0.5, 'F');
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(148, 163, 184);
-    doc.text('SG Multimídia  |  sgmultimidiasps@gmail.com  |  São Pedro do Sul - RS', W / 2, H - 10, { align: 'center' });
-    doc.setTextColor(99, 102, 241);
-    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, W / 2, H - 5, { align: 'center' });
-
+    
+    if (data.discount_value && data.discount_value > 0) {
+      this.doc.setTextColor(37, 99, 235);
+      this.doc.text('Desconto (valor fixo):', totalsX, this.currentY);
+      this.doc.text(
+        `-${this.formatCurrency(data.discount_value)}`,
+        this.pageWidth - this.margin,
+        this.currentY,
+        { align: 'right' }
+      );
+      this.currentY += 6;
+    }
+    
+    // Total
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(this.primaryColor[0], this.primaryColor[1], this.primaryColor[2]);
+    this.doc.text('TOTAL:', totalsX, this.currentY);
+    this.doc.text(this.formatCurrency(data.total), this.pageWidth - this.margin, this.currentY, { align: 'right' });
+    
+    // Footer
+    this.addFooter(1, 1);
+    
     return this.doc;
   }
 
