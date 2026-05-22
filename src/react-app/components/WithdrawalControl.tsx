@@ -27,7 +27,7 @@ export function WithdrawalControl() {
   const [notes, setNotes] = useState('');
   
   // Settings form state
-  const [newPercentage, setNewPercentage] = useState('20');
+  const [newPercentage, setNewPercentage] = useState('40');
   
   const toast = useToast();
   const { confirm } = useConfirm();
@@ -224,11 +224,8 @@ export function WithdrawalControl() {
     link.click();
   };
 
-  const DAS_MEI = 75.00;
-  const reservePercentage = settings?.percentage || 20;
-  const reserveAmount = (monthlyRevenue * reservePercentage) / 100;
-  const recommendedAmount = Math.max(0, monthlyRevenue - DAS_MEI - reserveAmount);
-  const availableAmount = Math.max(0, recommendedAmount - monthlyWithdrawn);
+  const recommendedAmount = (monthlyRevenue * (settings?.percentage || 40)) / 100;
+  const availableAmount = recommendedAmount - monthlyWithdrawn;
   const percentageWithdrawn = monthlyRevenue > 0 ? (monthlyWithdrawn / monthlyRevenue) * 100 : 0;
 
   if (isLoading) {
@@ -281,7 +278,7 @@ export function WithdrawalControl() {
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3 text-white">
           <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Disponível p/ retirada</span>
+            <span className="text-[10px] opacity-90 leading-tight">Recomendado</span>
             <DollarSign className="w-3 h-3" />
           </div>
           <p className="text-base font-bold">R$ {recommendedAmount.toFixed(2)}</p>
@@ -289,7 +286,7 @@ export function WithdrawalControl() {
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-3 text-white">
           <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Ainda disponível</span>
+            <span className="text-[10px] opacity-90 leading-tight">Disponível</span>
             <TrendingDown className="w-3 h-3" />
           </div>
           <p className="text-base font-bold">R$ {Math.max(0, availableAmount).toFixed(2)}</p>
