@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, FileText, Calendar, DollarSign, History } from 'lucide-react';
+import { X, FileText, Calendar, DollarSign, History, Download } from 'lucide-react';
 import type { Client } from '@/shared/types';
 import { useToast } from './ToastContainer';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
@@ -131,6 +131,19 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
     } finally {
       setLoading(false);
     }
+  };
+
+  const reissuePDF = (receipt: any) => {
+    generateMonthlyReceiptPDF({
+      receipt_number: receipt.receipt_number || receipt.id.toString(),
+      client_name: receipt.client_name,
+      client_whatsapp: receipt.client_whatsapp || '',
+      amount: Number(receipt.amount),
+      description: receipt.description,
+      month_reference: receipt.month_reference,
+      created_at: receipt.created_at,
+    });
+    toast.success('PDF gerado!');
   };
 
   if (!isOpen) return null;
@@ -307,9 +320,18 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
                             </span>
                           </div>
                         </div>
-                        <span className="text-slate-500 text-xs flex-shrink-0">
-                          {new Date(receipt.created_at).toLocaleDateString('pt-BR')}
-                        </span>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className="text-slate-500 text-xs">
+                            {new Date(receipt.created_at).toLocaleDateString('pt-BR')}
+                          </span>
+                          <button
+                            onClick={() => reissuePDF(receipt)}
+                            className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
+                            title="Baixar PDF"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

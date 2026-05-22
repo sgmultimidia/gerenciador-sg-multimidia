@@ -517,7 +517,7 @@ app.get("/api/receipts/quote/:quoteId", async (c) => {
 app.get("/api/monthly-receipts", async (c) => {
   try {
     const clientId = c.req.query("client_id");
-    let query = `SELECT mr.*, c.name as client_name 
+    let query = `SELECT mr.*, c.name as client_name, c.whatsapp as client_whatsapp
       FROM monthly_receipts mr 
       JOIN clients c ON mr.client_id = c.id`;
     if (clientId) query += ` WHERE mr.client_id = ${clientId}`;
