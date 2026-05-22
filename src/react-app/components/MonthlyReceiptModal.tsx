@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, FileText, Calendar, DollarSign, History, Download } from 'lucide-react';
+import { X, FileText, Calendar, DollarSign, History, Download, Plus } from 'lucide-react';
 import type { Client } from '@/shared/types';
 import { useToast } from './ToastContainer';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
-import { generateMonthlyReceiptPDF } from '@/react-app/utils/pdfGenerator';
+import { generateMonthlyReceiptPDF, generateReceiptPDF } from '@/react-app/utils/pdfGenerator';
 
 interface MonthlyReceiptModalProps {
   isOpen: boolean;
@@ -15,20 +15,28 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
   const toast = useToast();
   useLockBodyScroll(isOpen, onClose);
 
-  const [activeTab, setActiveTab] = useState<'new' | 'history'>('new');
-  const [selectedClientId, setSelectedClientId] = useState('');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [monthReference, setMonthReference] = useState(() => {
+  const [activeTab, setActiveTab] = useState<'monthly' | 'avulso' | 'history'>('monthly');
+
+  // Monthly receipt states
+  const [monthlyClientId, setMonthlyClientId] = useState('');
+  const [monthlyAmount, setMonthlyAmount] = useState('');
+  const [monthlyDescription, setMonthlyDescription] = useState('');
+  const [monthlyReference, setMonthlyReference] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [loading, setLoading] = useState(false);
+
+  // Avulso receipt states
+  const [avulsoClientId, setAvulsoClientId] = useState('');
+  const [avulsoAmount, setAvulsoAmount] = useState('');
+  const [avulsoDescription, setAvulsoDescription] = useState('');
 
   // History states
   const [receipts, setReceipts] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [filterClient, setFilterClient] = useState('');
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen && activeTab === 'history') loadHistory();
@@ -37,116 +45,131 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
   const loadHistory = async () => {
     setLoadingHistory(true);
     try {
-      const url = filterClient
-        ? `/api/monthly-receipts?client_id=${filterClient}`
-        : '/api/monthly-receipts';
+      const url = filterClient ? `/api/monthly-receipts?client_id=${filterClient}` : '/api/monthly-receipts';
       const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setReceipts(data);
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setLoadingHistory(false);
-    }
+      if (response.ok) setReceipts(await response.json());
+    } catch { } finally { setLoadingHistory(false); }
   };
 
-  const selectedClient = clients.find(c => c.id === parseInt(selectedClientId));
+  const monthlyClient = clients.find(c => c.id === parseInt(monthlyClientId));
+  const avulsoClient = clients.find(c => c.id === parseInt(avulsoClientId));
 
-  const generateReceipt = async () => {
-    if (!selectedClientId || !amount || !description || !monthReference) {
-      toast.warning('Preencha todos os campos obrigatórios');
-      return;
+  const generateMonthly = async () => {
+    if (!monthlyClientId || !monthlyAmount || !monthlyDescription || !monthlyReference) {
+      toast.warning('Preencha todos os campos'); return;
     }
-
-    const finalAmount = parseFloat(amount);
-    if (isNaN(finalAmount) || finalAmount <= 0) {
-      toast.warning('Valor inválido');
-      return;
-    }
+    const amount = parseFloat(monthlyAmount);
+    if (isNaN(amount) || amount <= 0) { toast.warning('Valor inválido'); return; }
 
     setLoading(true);
     try {
-      const receiptResponse = await fetch('/api/monthly-receipts', {
+      const res = await fetch('/api/monthly-receipts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: selectedClient!.id,
-          amount: finalAmount,
-          description,
-          month_reference: monthReference
-        })
+        body: JSON.stringify({ client_id: monthlyClient!.id, amount, description: monthlyDescription, month_reference: monthlyReference })
       });
+      if (!res.ok) throw new Error();
 
-      if (!receiptResponse.ok) throw new Error('Falha ao criar recibo');
-
-      const receipt = await receiptResponse.json();
-
-      const [year, month] = monthReference.split('-');
-      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-      const monthName = monthNames[parseInt(month) - 1];
+      const [year, month] = monthlyReference.split('-');
+      const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
       await fetch('/api/cash-transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'income',
-          amount: finalAmount,
-          description: `Recibo Mensal - ${selectedClient!.name} - ${monthName}/${year}`,
-          category: 'Recibo Mensal',
-          client_id: selectedClient!.id,
-          quote_id: null,
-          receipt_id: receipt.id,
-          payment_method: null,
-          transaction_date: new Date().toISOString().split('T')[0]
+          type: 'income', amount, client_id: monthlyClient!.id,
+          description: `Recibo Mensal - ${monthlyClient!.name} - ${monthNames[parseInt(month)-1]}/${year}`,
+          category: 'Recibo Mensal', transaction_date: new Date().toISOString().split('T')[0]
         })
       });
 
       generateMonthlyReceiptPDF({
-        receipt_number: receipt.receipt_number || receipt.id.toString(),
-        client_name: selectedClient!.name,
-        client_whatsapp: selectedClient!.whatsapp,
-        amount: finalAmount,
-        description,
-        month_reference: monthReference,
+        client_name: monthlyClient!.name, client_whatsapp: monthlyClient!.whatsapp,
+        amount, description: monthlyDescription, month_reference: monthlyReference,
         created_at: new Date().toISOString(),
       });
 
-      toast.success('Recibo gerado com sucesso!');
-
-      if (selectedClient!.whatsapp) {
-        const number = selectedClient!.whatsapp.replace(/\D/g, '');
-        const msg = encodeURIComponent(`Olá ${selectedClient!.name}! Segue o recibo referente ao mês de ${monthName}/${year} no valor de R$ ${finalAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}. O PDF foi gerado. Qualquer dúvida estou à disposição!`);
+      toast.success('Recibo mensal gerado!');
+      if (monthlyClient!.whatsapp) {
+        const number = monthlyClient!.whatsapp.replace(/\D/g, '');
+        const msg = encodeURIComponent(`Olá ${monthlyClient!.name}! Segue o recibo de ${monthNames[parseInt(month)-1]}/${year} no valor de R$ ${amount.toLocaleString('pt-BR', {minimumFractionDigits:2})}. Obrigado!`);
         window.open(`https://wa.me/55${number}?text=${msg}`, '_blank');
       }
 
-      setSelectedClientId('');
-      setAmount('');
-      setDescription('');
+      setMonthlyClientId(''); setMonthlyAmount(''); setMonthlyDescription('');
       onClose();
-    } catch (error) {
-      toast.error('Erro ao gerar recibo');
-    } finally {
-      setLoading(false);
+    } catch { toast.error('Erro ao gerar recibo'); } finally { setLoading(false); }
+  };
+
+  const generateAvulso = async () => {
+    if (!avulsoClientId || !avulsoAmount || !avulsoDescription) {
+      toast.warning('Preencha todos os campos'); return;
     }
+    const amount = parseFloat(avulsoAmount);
+    if (isNaN(amount) || amount <= 0) { toast.warning('Valor inválido'); return; }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/monthly-receipts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ client_id: avulsoClient!.id, amount, description: avulsoDescription, month_reference: new Date().toISOString().substring(0, 7) })
+      });
+      if (!res.ok) throw new Error();
+      const receipt = await res.json();
+
+      await fetch('/api/cash-transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'income', amount, client_id: avulsoClient!.id,
+          description: `Recibo Avulso - ${avulsoClient!.name} - ${avulsoDescription}`,
+          category: 'Recibo Avulso', transaction_date: new Date().toISOString().split('T')[0]
+        })
+      });
+
+      generateReceiptPDF({
+        receipt_number: receipt.id?.toString() || '0',
+        quote_number: 'AVU',
+        client_name: avulsoClient!.name,
+        client_whatsapp: avulsoClient!.whatsapp,
+        client_email: avulsoClient!.email,
+        items: [{ id: '1', name: avulsoDescription, price: amount, type: 'service' as const }],
+        subtotal: amount,
+        discount_percentage: 0,
+        discount_value: 0,
+        total: amount,
+        created_at: new Date().toISOString(),
+      });
+
+      toast.success('Recibo avulso gerado!');
+      if (avulsoClient!.whatsapp) {
+        const number = avulsoClient!.whatsapp.replace(/\D/g, '');
+        const msg = encodeURIComponent(`Olá ${avulsoClient!.name}! Segue o recibo no valor de R$ ${amount.toLocaleString('pt-BR', {minimumFractionDigits:2})} referente a: ${avulsoDescription}. Obrigado!`);
+        window.open(`https://wa.me/55${number}?text=${msg}`, '_blank');
+      }
+
+      setAvulsoClientId(''); setAvulsoAmount(''); setAvulsoDescription('');
+      onClose();
+    } catch { toast.error('Erro ao gerar recibo'); } finally { setLoading(false); }
   };
 
   const reissuePDF = (receipt: any) => {
     generateMonthlyReceiptPDF({
-      receipt_number: receipt.receipt_number || receipt.id.toString(),
-      client_name: receipt.client_name,
-      client_whatsapp: receipt.client_whatsapp || '',
-      amount: Number(receipt.amount),
-      description: receipt.description,
-      month_reference: receipt.month_reference,
-      created_at: receipt.created_at,
+      client_name: receipt.client_name, client_whatsapp: receipt.client_whatsapp || '',
+      amount: Number(receipt.amount), description: receipt.description,
+      month_reference: receipt.month_reference, created_at: receipt.created_at,
     });
     toast.success('PDF gerado!');
   };
 
   if (!isOpen) return null;
+
+  const tabs = [
+    { id: 'monthly', label: 'Recibo Mensal', icon: Calendar },
+    { id: 'avulso', label: 'Recibo Avulso', icon: Plus },
+    { id: 'history', label: 'Histórico', icon: History },
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -157,143 +180,126 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
             <div className="flex items-center gap-3">
               <FileText className="w-6 h-6 text-green-400" />
               <div>
-                <h3 className="text-xl font-bold text-white">Recibo Mensal</h3>
-                <p className="text-green-200 text-sm">Gerar recibo para pagamentos recorrentes</p>
+                <h3 className="text-xl font-bold text-white">Recibos</h3>
+                <p className="text-green-200 text-sm">Gestão centralizada de recibos</p>
               </div>
             </div>
             <button onClick={onClose} className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-all">
               <X className="w-5 h-5" />
             </button>
           </div>
-
           {/* Tabs */}
           <div className="flex border-t border-green-800">
-            <button
-              onClick={() => setActiveTab('new')}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'new'
-                  ? 'bg-green-800/50 text-white border-b-2 border-green-400'
-                  : 'text-green-300 hover:bg-green-800/30'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              Novo Recibo
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'history'
-                  ? 'bg-green-800/50 text-white border-b-2 border-green-400'
-                  : 'text-green-300 hover:bg-green-800/30'
-              }`}
-            >
-              <History className="w-4 h-4" />
-              Histórico
-            </button>
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id as any)}
+                className={`flex-1 py-2.5 text-xs font-semibold transition-all flex items-center justify-center gap-1 ${
+                  activeTab === id ? 'bg-green-800/50 text-white border-b-2 border-green-400' : 'text-green-300 hover:bg-green-800/30'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Content */}
         <div className="overflow-y-auto flex-1">
-          {activeTab === 'new' && (
+          {/* Monthly Tab */}
+          {activeTab === 'monthly' && (
             <div className="p-6 space-y-4">
-              {/* Client */}
               <div>
-                <label className="block text-white font-semibold mb-2">Cliente <span className="text-red-400">*</span></label>
-                <select
-                  value={selectedClientId}
-                  onChange={(e) => setSelectedClientId(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
+                <label className="block text-white font-semibold mb-2">Cliente *</label>
+                <select value={monthlyClientId} onChange={e => setMonthlyClientId(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500">
                   <option value="">Selecione um cliente</option>
-                  {clients.map(client => (
-                    <option key={client.id} value={client.id}>{client.name}</option>
-                  ))}
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
-
-              {/* Month */}
               <div>
                 <label className="block text-white font-semibold mb-2 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-green-400" />
-                  Mês de Referência <span className="text-red-400">*</span>
+                  <Calendar className="w-4 h-4 text-green-400" /> Mês de Referência *
                 </label>
-                <input
-                  type="month"
-                  value={monthReference}
-                  onChange={(e) => setMonthReference(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
+                <input type="month" value={monthlyReference} onChange={e => setMonthlyReference(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500" />
               </div>
-
-              {/* Amount */}
               <div>
                 <label className="block text-white font-semibold mb-2 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-400" />
-                  Valor (R$) <span className="text-red-400">*</span>
+                  <DollarSign className="w-4 h-4 text-green-400" /> Valor (R$) *
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                <input type="number" step="0.01" value={monthlyAmount} onChange={e => setMonthlyAmount(e.target.value)}
                   placeholder="0.00"
-                />
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500" />
               </div>
-
-              {/* Description */}
               <div>
-                <label className="block text-white font-semibold mb-2">Descrição do Serviço <span className="text-red-400">*</span></label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Exemplo: Mensalidade de manutenção de redes sociais"
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-                />
+                <label className="block text-white font-semibold mb-2">Descrição do Serviço *</label>
+                <textarea value={monthlyDescription} onChange={e => setMonthlyDescription(e.target.value)}
+                  placeholder="Ex: Transmissão ao vivo quinzenal" rows={3}
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none" />
               </div>
-
-              <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                <p className="text-sm text-slate-300">
-                  <span className="font-semibold text-green-300">Importante:</span> Este recibo será registrado automaticamente no controle de caixa como entrada de receita. Uma cópia em PDF será gerada para impressão.
-                </p>
+              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-slate-300">
+                <span className="font-semibold text-green-300">Importante:</span> O valor será lançado automaticamente no caixa como receita.
               </div>
-
               <div className="flex gap-3">
-                <button
-                  onClick={onClose}
-                  disabled={loading}
-                  className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={generateReceipt}
-                  disabled={loading || !selectedClientId || !amount || !description || !monthReference}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all"
-                >
+                <button onClick={onClose} className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all">Cancelar</button>
+                <button onClick={generateMonthly} disabled={loading || !monthlyClientId || !monthlyAmount || !monthlyDescription}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all">
                   {loading ? 'Gerando...' : 'Gerar Recibo'}
                 </button>
               </div>
             </div>
           )}
 
+          {/* Avulso Tab */}
+          {activeTab === 'avulso' && (
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-white font-semibold mb-2">Cliente *</label>
+                <select value={avulsoClientId} onChange={e => setAvulsoClientId(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+                  <option value="">Selecione um cliente</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-white font-semibold mb-2 flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-green-400" /> Valor (R$) *
+                </label>
+                <input type="number" step="0.01" value={avulsoAmount} onChange={e => setAvulsoAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500" />
+              </div>
+              <div>
+                <label className="block text-white font-semibold mb-2">Descrição do Serviço *</label>
+                <textarea value={avulsoDescription} onChange={e => setAvulsoDescription(e.target.value)}
+                  placeholder="Ex: Gravação de áudio - 2 faixas" rows={3}
+                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none" />
+              </div>
+              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm text-slate-300">
+                <span className="font-semibold text-green-300">Importante:</span> O valor será lançado automaticamente no caixa como receita.
+              </div>
+              <div className="flex gap-3">
+                <button onClick={onClose} className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all">Cancelar</button>
+                <button onClick={generateAvulso} disabled={loading || !avulsoClientId || !avulsoAmount || !avulsoDescription}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all">
+                  {loading ? 'Gerando...' : 'Gerar Recibo'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* History Tab */}
           {activeTab === 'history' && (
             <div className="p-5">
               <div className="mb-4">
-                <select
-                  value={filterClient}
-                  onChange={(e) => setFilterClient(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                >
+                <select value={filterClient} onChange={e => setFilterClient(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
                   <option value="">Todos os clientes</option>
-                  {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
-
               {loadingHistory ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500" />
@@ -321,14 +327,9 @@ export default function MonthlyReceiptModal({ isOpen, onClose, clients }: Monthl
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                          <span className="text-slate-500 text-xs">
-                            {new Date(receipt.created_at).toLocaleDateString('pt-BR')}
-                          </span>
-                          <button
-                            onClick={() => reissuePDF(receipt)}
-                            className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
-                            title="Baixar PDF"
-                          >
+                          <span className="text-slate-500 text-xs">{new Date(receipt.created_at).toLocaleDateString('pt-BR')}</span>
+                          <button onClick={() => reissuePDF(receipt)}
+                            className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all" title="Baixar PDF">
                             <Download className="w-3.5 h-3.5" />
                           </button>
                         </div>

@@ -28,7 +28,6 @@ import QuoteHistoryModal from '@/react-app/components/QuoteHistoryModal';
 import ContractsManagement from '@/react-app/components/ContractsManagement';
 import ContractGenerator from '@/react-app/components/contracts/ContractGenerator';
 import ContractViewer from '@/react-app/components/contracts/ContractViewer';
-import ReceiptGeneratorModal from '@/react-app/components/ReceiptGeneratorModal';
 import RecurringProjects from '@/react-app/components/RecurringProjects';
 import Prospects from '@/react-app/components/Prospects';
 import Transmissions from '@/react-app/components/Transmissions';
@@ -65,11 +64,8 @@ export default function HomeNew() {
   const [showContractsManagement, setShowContractsManagement] = useState(false);
   const [showContractGenerator, setShowContractGenerator] = useState(false);
   const [showContractViewer, setShowContractViewer] = useState(false);
-  const [showReceiptGenerator, setShowReceiptGenerator] = useState(false);
   const [selectedContract, setSelectedContract] = useState<any | null>(null);
   const [selectedQuoteForContract, setSelectedQuoteForContract] = useState<number | null>(null);
-  const [selectedQuoteForReceipt, setSelectedQuoteForReceipt] = useState<any | null>(null);
-  const [selectedClientForReceipt, setSelectedClientForReceipt] = useState<Client | null>(null);
   const [quoteHistoryClient, setQuoteHistoryClient] = useState<Client | null>(null);
   const [clientQuotes, setClientQuotes] = useState<any[]>([]);
   const [wizardPreSelectedClient, setWizardPreSelectedClient] = useState<Client | null>(null);
@@ -971,11 +967,7 @@ export default function HomeNew() {
             toast.error('Erro ao gerar PDF');
           }
         }}
-        onQuoteReceipt={(quote, client) => {
-          setSelectedQuoteForReceipt(quote);
-          setSelectedClientForReceipt(client);
-          setShowReceiptGenerator(true);
-        }}
+        onQuoteReceipt={() => {}}
         onQuoteContract={(_quote, _client) => toast.info('Funcionalidade de contrato será implementada em breve')}
         onMonthlyReceiptPDF={(_receipt, _client) => toast.info('Funcionalidade de PDF do recibo mensal será implementada em breve')}
       />
@@ -1065,19 +1057,7 @@ export default function HomeNew() {
             }
           }
         }}
-        onReceipt={(quoteId: number) => {
-          const quote = universalSearchResults.find(q => q.id === quoteId);
-          if (quote) {
-            const client = clients.find(c => c.id === quote.client_id);
-            if (client) {
-              setSelectedQuoteForReceipt(quote);
-              setSelectedClientForReceipt(client);
-              setShowReceiptGenerator(true);
-            } else {
-              toast.error('Cliente não encontrado');
-            }
-          }
-        }}
+        onReceipt={() => {}}
         onGenerateContract={async (quoteId: number) => {
           // Check if contract already exists for this quote
           try {
@@ -1253,11 +1233,7 @@ export default function HomeNew() {
             toast.error('Erro ao gerar PDF');
           }
         }}
-        onReceipt={(quote: any, client: Client) => {
-          setSelectedQuoteForReceipt(quote);
-          setSelectedClientForReceipt(client);
-          setShowReceiptGenerator(true);
-        }}
+        onReceipt={() => {}}
         onContract={() => {
           toast.info('Funcionalidade de contrato será implementada em breve');
         }}
@@ -1290,18 +1266,7 @@ export default function HomeNew() {
           contract={selectedContract}
         />
       )}
-
-      <ReceiptGeneratorModal
-        isOpen={showReceiptGenerator}
-        onClose={() => {
-          setShowReceiptGenerator(false);
-          setSelectedQuoteForReceipt(null);
-          setSelectedClientForReceipt(null);
-        }}
-        quote={selectedQuoteForReceipt}
-        client={selectedClientForReceipt}
-      />
-      <GlobalSearch
+<GlobalSearch
         isOpen={showGlobalSearch}
         onClose={() => setShowGlobalSearch(false)}
         onNavigate={(type, id) => {
