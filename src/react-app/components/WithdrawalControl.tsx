@@ -4,7 +4,6 @@ import type { Withdrawal, WithdrawalSettings } from '../../shared/types';
 import { useToast } from './ToastContainer';
 import { useConfirm } from './ConfirmDialog';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
-import { formatBRL } from '@/react-app/utils/formatBRL';
 
 export function WithdrawalControl() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
@@ -28,7 +27,7 @@ export function WithdrawalControl() {
   const [notes, setNotes] = useState('');
   
   // Settings form state
-  const [newPercentage, setNewPercentage] = useState('40');
+  const [newPercentage, setNewPercentage] = useState('20');
   
   const toast = useToast();
   const { confirm } = useConfirm();
@@ -142,7 +141,7 @@ export function WithdrawalControl() {
     if (withdrawalAmount > availableAmount) {
       const proceed = await confirm({
         title: 'Retirada acima do recomendado',
-        message: `Você está retirando R$ ${formatBRL(withdrawalAmount)}, mas o valor recomendado disponível é R$ ${formatBRL(availableAmount)}. Deseja continuar?`,
+        message: `Você está retirando R$ ${withdrawalAmount.toFixed(2)}, mas o valor recomendado disponível é R$ ${availableAmount.toFixed(2)}. Deseja continuar?`,
         type: 'warning',
         confirmText: 'Continuar',
         cancelText: 'Cancelar'
@@ -209,7 +208,7 @@ export function WithdrawalControl() {
     const headers = ['Data', 'Valor', 'Observações'];
     const rows = withdrawals.map(w => [
       new Date(w.withdrawal_date).toLocaleDateString('pt-BR'),
-      `R$ ${formatBRL(w.amount)}`,
+      `R$ ${w.amount.toFixed(2)}`,
       w.notes || ''
     ]);
 
@@ -225,8 +224,11 @@ export function WithdrawalControl() {
     link.click();
   };
 
-  const recommendedAmount = (monthlyRevenue * (settings?.percentage || 40)) / 100;
-  const availableAmount = recommendedAmount - monthlyWithdrawn;
+  const DAS_MEI = 75.00;
+  const reservePercentage = settings?.percentage || 20;
+  const reserveAmount = (monthlyRevenue * reservePercentage) / 100;
+  const recommendedAmount = Math.max(0, monthlyRevenue - DAS_MEI - reserveAmount);
+  const availableAmount = Math.max(0, recommendedAmount - monthlyWithdrawn);
   const percentageWithdrawn = monthlyRevenue > 0 ? (monthlyWithdrawn / monthlyRevenue) * 100 : 0;
 
   if (isLoading) {
@@ -267,38 +269,45 @@ export function WithdrawalControl() {
         />
       </div>
 
-      {/* Stats Cards - Grid 2x2 */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-3 text-white">
-          <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Faturamento</span>
-            <TrendingUp className="w-3 h-3" />
+      {/* Stats Cards */}
+      <div className="bg-slate-700/50 rounded-lg p-3 border border-slate-600 space-y-2">
+        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Cálculo do Mês</p>
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-300">Faturamento bruto</span>
+            <span className="text-white font-semibold">R$ {monthlyRevenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
           </div>
-          <p className="text-base font-bold">R$ {formatBRL(monthlyRevenue)}</p>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-300">(-) DAS MEI</span>
+            <span className="text-red-400 font-semibold">- R$ {DAS_MEI.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-300">(-) Reserva ({reservePercentage}%)</span>
+            <span className="text-yellow-400 font-semibold">- R$ {reserveAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+          </div>
+          <div className="h-px bg-slate-600 my-1" />
+          <div className="flex justify-between text-sm">
+            <span className="text-green-300 font-semibold">Disponível para retirada</span>
+            <span className="text-green-400 font-bold">R$ {recommendedAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+          </div>
         </div>
+      </div>
 
+      <div className="grid grid-cols-2 gap-2">
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3 text-white">
           <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Recomendado</span>
+            <span className="text-[10px] opacity-90 leading-tight">Ainda disponível</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {formatBRL(recommendedAmount)}</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-3 text-white">
-          <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Disponível</span>
-            <TrendingDown className="w-3 h-3" />
-          </div>
-          <p className="text-base font-bold">R$ {formatBRL(Math.max(0, availableAmount))}</p>
+          <p className="text-base font-bold">R$ {availableAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3 text-white">
           <div className="flex items-start justify-between mb-2">
-            <span className="text-[10px] opacity-90 leading-tight">Retirado</span>
+            <span className="text-[10px] opacity-90 leading-tight">Já retirado</span>
             <DollarSign className="w-3 h-3" />
           </div>
-          <p className="text-base font-bold">R$ {formatBRL(monthlyWithdrawn)}</p>
+          <p className="text-base font-bold">R$ {monthlyWithdrawn.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
           <p className="text-[9px] opacity-75 mt-0.5">{percentageWithdrawn.toFixed(1)}%</p>
         </div>
       </div>
@@ -307,7 +316,7 @@ export function WithdrawalControl() {
       {availableAmount < 0 && (
         <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-2">
           <p className="text-yellow-300 text-xs">
-            ⚠️ Retirado R$ {formatBRL(Math.abs(availableAmount))} acima do recomendado
+            ⚠️ Retirado R$ {Math.abs(availableAmount).toFixed(2)} acima do recomendado
           </p>
         </div>
       )}
@@ -355,7 +364,7 @@ export function WithdrawalControl() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-white">
-                        R$ {formatBRL(withdrawal.amount)}
+                        R$ {withdrawal.amount.toFixed(2)}
                       </span>
                       <span className="text-[10px] text-slate-400">
                         {new Date(withdrawal.withdrawal_date).toLocaleDateString('pt-BR')}
@@ -415,7 +424,7 @@ export function WithdrawalControl() {
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Disponível: R$ {formatBRL(Math.max(0, availableAmount))}
+                    Disponível: R$ {Math.max(0, availableAmount).toFixed(2)}
                   </p>
                 </div>
 
@@ -513,7 +522,7 @@ export function WithdrawalControl() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
                   <p className="text-xs text-blue-800">
-                    Com {newPercentage}%: até <strong>R$ {formatBRL(((monthlyRevenue * parseFloat(newPercentage || '0')) / 100))}</strong> este mês
+                    Com {newPercentage}%: até <strong>R$ {((monthlyRevenue * parseFloat(newPercentage || '0')) / 100).toFixed(2)}</strong> este mês
                   </p>
                 </div>
               </div>
