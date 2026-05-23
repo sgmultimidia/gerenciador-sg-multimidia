@@ -1290,7 +1290,11 @@ export default function HomeNew() {
           contract={selectedContract}
         />
       )}
-<ArchiveModal
+<GoalsModal
+        isOpen={showGoals}
+        onClose={() => setShowGoals(false)}
+      />
+      <ArchiveModal
         isOpen={showArchive}
         onClose={() => setShowArchive(false)}
         clients={clients}
