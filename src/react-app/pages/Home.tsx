@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, DollarSign, Calendar, 
-  FileText, FolderKanban, Plus, Settings, RefreshCw, Search, FolderOpen
+  FileText, FolderKanban, Plus, Settings, RefreshCw, Search, FolderOpen, X
 } from 'lucide-react';
 import type { Client, Service } from '@/shared/types';
 import { useToast } from '@/react-app/components/ToastContainer';
