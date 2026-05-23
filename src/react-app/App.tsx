@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import HomePage from "@/react-app/pages/Home";
 import ClientPortal from "@/react-app/pages/ClientPortal";
-import InstallPrompt from "@/react-app/components/InstallPrompt";
 import { ToastProvider } from "@/react-app/components/ToastContainer";
 import { ConfirmProvider } from "@/react-app/components/ConfirmDialog";
 
@@ -30,7 +29,6 @@ export default function App() {
     <ToastProvider>
       <ConfirmProvider>
         <Router>
-          <InstallPrompt />
           <AnimatedRoutes />
         </Router>
       </ConfirmProvider>
