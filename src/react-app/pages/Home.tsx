@@ -22,7 +22,7 @@ import FinancialReports from '@/react-app/components/FinancialReports';
 import ProjectStatus from '@/react-app/components/ProjectStatus';
 import MonthlyReceiptModal from '@/react-app/components/MonthlyReceiptModal';
 import ServicesManagementModal from '@/react-app/components/ServicesManagementModal';
-import { WithdrawalControl } from '@/react-app/components/WithdrawalControl';
+import WithdrawalControl from '@/react-app/components/WithdrawalControl';
 import QuoteWizard from '@/react-app/components/QuoteWizard';
 import QuoteHistoryModal from '@/react-app/components/QuoteHistoryModal';
 import ContractsManagement from '@/react-app/components/ContractsManagement';
