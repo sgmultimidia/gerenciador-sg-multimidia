@@ -995,6 +995,16 @@ export default function HomeNew() {
           }
         }}
         onQuoteReceipt={() => {}}
+        onQuotePix={(quote, client) => {
+          setPixChargeData({
+            amount: quote.total,
+            clientName: client.name,
+            clientEmail: client.email,
+            correlationId: `quote-${quote.id}`,
+            description: `Orçamento #${quote.quote_number}`,
+          });
+          setShowPixCharge(true);
+        }}
         onQuoteContract={(_quote, _client) => toast.info('Funcionalidade de contrato será implementada em breve')}
         onMonthlyReceiptPDF={(_receipt, _client) => toast.info('Funcionalidade de PDF do recibo mensal será implementada em breve')}
       />

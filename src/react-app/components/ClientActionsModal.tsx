@@ -19,6 +19,7 @@ interface ClientActionsModalProps {
   onQuotePDF?: (quote: any, client: Client) => void;
   onQuoteReceipt?: (quote: any, client: Client) => void;
   onQuoteContract?: (quote: any, client: Client) => void;
+  onQuotePix?: (quote: any, client: Client) => void;
   onMonthlyReceiptPDF?: (receipt: MonthlyReceipt, client: Client) => void;
 }
 
@@ -122,20 +123,13 @@ export default function ClientActionsModal({
 
   const handleDeleteClient = async () => {
     if (!client) return;
-    try {
-      await onDeleteClient(client.id);
-      onClose();
-    } catch {
-      // error handled by parent
-    }
+    await onDeleteClient(client.id);
+    onClose();
   };
 
   const handleToggleFavorite = async () => {
-    if (!client) return;
-    try {
+    if (client) {
       await onToggleFavorite(client);
-    } catch {
-      // error handled by parent
     }
   };
 
@@ -460,6 +454,7 @@ export default function ClientActionsModal({
         onPDF={onQuotePDF}
         onReceipt={onQuoteReceipt}
         onContract={onQuoteContract}
+        onPix={onQuotePix}
       />
     </>
   );
