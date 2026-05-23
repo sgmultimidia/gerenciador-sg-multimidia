@@ -2170,6 +2170,68 @@ app.delete("/api/archive/:id", async (c) => {
   }
 });
 
+
+
+// GET cash balance
+app.get("/api/cash-balance", async (c) => {
+  try {
+    const result = await c.env.DB.prepare(
+      "SELECT SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) as balance FROM cash_transactions"
+    ).first() as any;
+    return c.json({ balance: result?.balance || 0 });
+  } catch {
+    return c.json({ error: "Failed to fetch balance" }, 500);
+  }
+});
+
+// ==================== METAS FINANCEIRAS ====================
+
+app.get("/api/goals", async (c) => {
+  try {
+    const result = await c.env.DB.prepare(
+      "SELECT * FROM financial_goals ORDER BY status ASC, deadline ASC"
+    ).all();
+    return c.json(result.results || []);
+  } catch {
+    return c.json({ error: "Failed to fetch goals" }, 500);
+  }
+});
+
+app.post("/api/goals", async (c) => {
+  try {
+    const { name, description, target_amount, deadline } = await c.req.json();
+    const result = await c.env.DB.prepare(
+      "INSERT INTO financial_goals (name, description, target_amount, deadline) VALUES (?, ?, ?, ?) RETURNING *"
+    ).bind(name, description || null, target_amount, deadline || null).first();
+    return c.json(result);
+  } catch {
+    return c.json({ error: "Failed to create goal" }, 500);
+  }
+});
+
+app.put("/api/goals/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const { name, description, target_amount, deadline, status } = await c.req.json();
+    const result = await c.env.DB.prepare(
+      "UPDATE financial_goals SET name=?, description=?, target_amount=?, deadline=?, status=?, updated_at=datetime('now') WHERE id=? RETURNING *"
+    ).bind(name, description || null, target_amount, deadline || null, status || 'active', id).first();
+    return c.json(result);
+  } catch {
+    return c.json({ error: "Failed to update goal" }, 500);
+  }
+});
+
+app.delete("/api/goals/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    await c.env.DB.prepare("DELETE FROM financial_goals WHERE id=?").bind(id).run();
+    return c.json({ success: true });
+  } catch {
+    return c.json({ error: "Failed to delete goal" }, 500);
+  }
+});
+
 // ==================== GLOBAL SEARCH ====================
 
 app.get("/api/search", async (c) => {
