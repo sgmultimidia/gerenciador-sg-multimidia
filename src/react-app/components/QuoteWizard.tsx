@@ -414,9 +414,9 @@ export default function QuoteWizard({
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-1 min-w-0 overflow-hidden">
-                              <h5 className="text-white font-semibold text-sm truncate">{displayName}</h5>
+                              <h5 className="text-white font-semibold text-sm line-clamp-1">{displayName}</h5>
                               {service.description && (
-                                <p className="text-slate-400 text-xs mt-0.5 truncate">{service.description}</p>
+                                <p className="text-slate-400 text-xs mt-0.5 line-clamp-1 hidden sm:block">{service.description}</p>
                               )}
                               <p className="text-blue-400 font-bold text-base mt-1">
                                 R$ {service.price.toFixed(2)}
