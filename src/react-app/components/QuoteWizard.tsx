@@ -122,13 +122,12 @@ export default function QuoteWizard({
 
     const newItems = [...cartItems, newItem];
 
-    // Add displacement as separate item
+    // Add displacement as separate item (R$1.50/km)
     if (displacement && displacement > 0) {
-      const kmValue = displacement * 1.5;
       newItems.push({
         id: `displacement-${Date.now()}`,
         name: `Deslocamento — ${displacement} km (ida e volta)`,
-        price: kmValue,
+        price: displacement * 1.5,
         type: 'service',
       });
     }
@@ -473,6 +472,7 @@ export default function QuoteWizard({
                                   }
                                   placeholder="Distância (km)"
                                   className="w-full px-2 py-1.5 text-xs rounded bg-slate-600 text-white border border-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder-slate-400"
+                                />
                               )}
                             </div>
                           </div>
