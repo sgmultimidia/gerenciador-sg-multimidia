@@ -17,7 +17,7 @@ interface RecurringProjectsProps {
 export default function RecurringProjects({ isOpen, onClose, clients }: RecurringProjectsProps) {
   const toast = useToast();
   const confirm = useConfirm();
-  useLockBodyScroll(isOpen);
+  useLockBodyScroll(isOpen, onClose);
   
   const [projects, setProjects] = useState<RecurringProject[]>([]);
   const [loading, setLoading] = useState(false);
@@ -296,6 +296,8 @@ export default function RecurringProjects({ isOpen, onClose, clients }: Recurrin
     }
   };
 
+
+  if (!isOpen) return null;
 
   const activeProjects = projects.filter(p => p.is_active);
   const inactiveProjects = projects.filter(p => !p.is_active);
