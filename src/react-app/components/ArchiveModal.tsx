@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, FolderOpen, Upload, Download, Trash2, File, FileText, FileImage, FileVideo, FileAudio, Search, Filter } from 'lucide-react';
+import { X, FolderOpen, Upload, Download, Trash2, File, FileText, FileImage, FileVideo, FileAudio, Search, Play } from 'lucide-react';
 import type { Client } from '@/shared/types';
 import { useToast } from './ToastContainer';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
@@ -46,6 +46,9 @@ export default function ArchiveModal({ isOpen, onClose, clients }: ArchiveModalP
   const [files, setFiles] = useState<ArchiveFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewFile, setPreviewFile] = useState<ArchiveFile | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterClient, setFilterClient] = useState('');
@@ -74,6 +77,31 @@ export default function ArchiveModal({ isOpen, onClose, clients }: ArchiveModalP
       if (res.ok) setFiles(await res.json());
     } catch { toast.error('Erro ao carregar arquivos'); } finally { setLoading(false); }
   };
+
+  const openPreview = async (file: ArchiveFile) => {
+    setPreviewFile(file);
+    setLoadingPreview(true);
+    try {
+      const res = await fetch(`/api/archive/${file.id}/download`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+      }
+    } catch { } finally { setLoadingPreview(false); }
+  };
+
+  const closePreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewFile(null);
+    setPreviewUrl(null);
+  };
+
+  const canPreview = (file: ArchiveFile) =>
+    file.file_type.startsWith('audio/') ||
+    file.file_type.startsWith('video/') ||
+    file.file_type.startsWith('image/') ||
+    file.file_type === 'application/pdf';
 
   const handleUpload = async () => {
     if (!uploadFile) { toast.warning('Selecione um arquivo'); return; }
@@ -236,6 +264,12 @@ export default function ArchiveModal({ isOpen, onClose, clients }: ArchiveModalP
                           {file.notes && <p className="text-slate-400 text-xs mt-1 truncate">{file.notes}</p>}
                         </div>
                         <div className="flex gap-1.5 flex-shrink-0">
+                          {canPreview(file) && (
+                            <button onClick={() => openPreview(file)}
+                              className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all" title="Visualizar">
+                              <Play className="w-4 h-4" />
+                            </button>
+                          )}
                           <button onClick={() => handleDownload(file)}
                             className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all" title="Baixar">
                             <Download className="w-4 h-4" />
@@ -313,6 +347,54 @@ export default function ArchiveModal({ isOpen, onClose, clients }: ArchiveModalP
           )}
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {previewFile && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[70] p-4">
+          <div className="w-full max-w-3xl">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white font-semibold truncate">{previewFile.original_filename}</p>
+              <div className="flex gap-2 ml-2">
+                <button onClick={() => handleDownload(previewFile)}
+                  className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all">
+                  <Download className="w-4 h-4" />
+                </button>
+                <button onClick={closePreview}
+                  className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            {loadingPreview ? (
+              <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500" />
+              </div>
+            ) : previewUrl ? (
+              <div className="bg-slate-900 rounded-xl overflow-hidden">
+                {previewFile.file_type.startsWith('audio/') && (
+                  <div className="p-8 text-center">
+                    <FileAudio className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                    <audio controls autoPlay src={previewUrl} className="w-full" />
+                  </div>
+                )}
+                {previewFile.file_type.startsWith('video/') && (
+                  <video controls autoPlay src={previewUrl} className="w-full max-h-[70vh]" />
+                )}
+                {previewFile.file_type.startsWith('image/') && (
+                  <img src={previewUrl} alt={previewFile.original_filename} className="w-full max-h-[70vh] object-contain" />
+                )}
+                {previewFile.file_type === 'application/pdf' && (
+                  <iframe src={previewUrl} className="w-full h-[70vh]" title={previewFile.original_filename} />
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-400">
+                <p>Não foi possível carregar a prévia.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
