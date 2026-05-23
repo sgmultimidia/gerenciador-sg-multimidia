@@ -277,9 +277,14 @@ export default function RecurringProjects({ isOpen, onClose, clients }: Recurrin
       });
 
       // Generate PDF
-      printReceipt(client, amount,
-                   selectedProjectForReceipt.description || selectedProjectForReceipt.project_name, 
-                   monthRef);
+      generateMonthlyReceiptPDF({
+        client_name: client.name,
+        client_whatsapp: client.whatsapp,
+        amount,
+        description: selectedProjectForReceipt.description || selectedProjectForReceipt.project_name,
+        month_reference: monthRef,
+        created_at: new Date().toISOString(),
+      });
       
       toast.success('Recibo gerado com sucesso!');
       setShowReceiptModal(false);
@@ -291,201 +296,6 @@ export default function RecurringProjects({ isOpen, onClose, clients }: Recurrin
     }
   };
 
-  const printReceipt = (client: Client, amount: number, desc: string, monthRef: string) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const [year, month] = monthRef.split('-');
-    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const monthName = monthNames[parseInt(month) - 1];
-
-    const numeroParaExtenso = (valor: number): string => {
-      const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
-      const especiais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
-      const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
-      const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
-
-      const parteInteira = Math.floor(valor);
-      const centavos = Math.round((valor - parteInteira) * 100);
-      let resultado = '';
-
-      if (parteInteira === 0) {
-        resultado = 'zero reais';
-      } else {
-        const milhares = Math.floor(parteInteira / 1000);
-        const restante = parteInteira % 1000;
-        
-        if (milhares > 0) {
-          if (milhares === 1) {
-            resultado += 'mil';
-          } else {
-            const c = Math.floor(milhares / 100);
-            const d = Math.floor((milhares % 100) / 10);
-            const u = milhares % 10;
-            
-            if (c > 0) resultado += centenas[c];
-            if (d === 1) {
-              if (resultado) resultado += ' e ';
-              resultado += especiais[u];
-            } else {
-              if (d > 0) {
-                if (resultado) resultado += ' e ';
-                resultado += dezenas[d];
-              }
-              if (u > 0) {
-                if (resultado) resultado += ' e ';
-                resultado += unidades[u];
-              }
-            }
-            resultado += ' mil';
-          }
-        }
-
-        const c = Math.floor(restante / 100);
-        const d = Math.floor((restante % 100) / 10);
-        const u = restante % 10;
-
-        if (c > 0) {
-          if (resultado && restante > 0) resultado += ' ';
-          if (restante === 100) {
-            resultado += 'cem';
-          } else {
-            resultado += centenas[c];
-          }
-        }
-
-        if (d === 1) {
-          if (resultado) resultado += ' e ';
-          resultado += especiais[u];
-        } else {
-          if (d > 0) {
-            if (resultado) resultado += ' e ';
-            resultado += dezenas[d];
-          }
-          if (u > 0) {
-            if (resultado) resultado += ' e ';
-            resultado += unidades[u];
-          }
-        }
-
-        resultado += parteInteira === 1 ? ' real' : ' reais';
-      }
-
-      if (centavos > 0) {
-        const d = Math.floor(centavos / 10);
-        const u = centavos % 10;
-        
-        resultado += ' e ';
-        
-        if (d === 1) {
-          resultado += especiais[u];
-        } else {
-          if (d > 0) resultado += dezenas[d];
-          if (u > 0) {
-            if (d > 0) resultado += ' e ';
-            resultado += unidades[u];
-          }
-        }
-        
-        resultado += centavos === 1 ? ' centavo' : ' centavos';
-      }
-
-      return resultado;
-    };
-
-    const valorExtenso = numeroParaExtenso(amount);
-    const hoje = new Date();
-    const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    const content = `
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Recibo Mensal - SG Multimídia</title>
-        <style>
-          @page { margin: 15mm; size: A4 landscape; }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Arial', sans-serif; color: #000; line-height: 1.4; padding: 15px; font-size: 20px; }
-          .receipt-container { max-width: 100%; margin: 0 auto; border: 2px solid #000; padding: 25px 35px; min-height: 500px; }
-          .header { text-align: left; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #000; }
-          .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 3px; letter-spacing: 1px; }
-          .header .info { font-size: 20px; color: #333; line-height: 1.3; }
-          .receipt-title { text-align: center; font-size: 20px; font-weight: bold; margin: 12px 0; letter-spacing: 6px; }
-          .receipt-subtitle { text-align: center; font-size: 18px; color: #555; margin-bottom: 20px; }
-          .content { margin: 15px 0; font-size: 20px; line-height: 1.8; }
-          .content p { margin-bottom: 12px; }
-          .underline { display: inline-block; border-bottom: 1px solid #000; min-width: 200px; padding: 0 5px; }
-          .value-line { margin: 15px 0; }
-          .footer { margin-top: 30px; }
-          .date-location { text-align: right; margin-bottom: 50px; font-size: 20px; }
-          .signature-section { margin-top: 40px; display: flex; justify-content: center; align-items: flex-end; }
-          .signature-block { text-align: center; }
-          .signature-line { border-top: 1px solid #000; width: 300px; padding-top: 5px; }
-          .signature-name { font-size: 20px; font-weight: bold; }
-          @media print {
-            body { padding: 0; }
-            .receipt-container { border: 2px solid #000; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="receipt-container">
-          <div class="header">
-            <h1>SG Multimídia</h1>
-            <div class="info">Estúdio de Produção Audiovisual</div>
-            <div class="info">São Pedro do Sul - RS | WhatsApp: (55) 9 9660-2449</div>
-          </div>
-
-          <div class="receipt-title">RECIBO</div>
-          <div class="receipt-subtitle">Referente ao mês de ${monthName} de ${year}</div>
-
-          <div class="content">
-            <p>
-              Recebemos de <span class="underline"><strong>${client.name}</strong></span>
-            </p>
-
-            <p class="value-line">
-              a quantia de <span class="underline"><strong>R$ ${amount.toFixed(2).replace('.', ',')}</strong></span> 
-              (<strong>${valorExtenso}</strong>),
-            </p>
-
-            <p>
-              referente a: <strong>${desc}</strong>
-            </p>
-
-            <p style="margin-top: 20px;">
-              Para maior clareza, firmamos o presente recibo para que produza os seus efeitos, 
-              dando plena, geral e irrevogável quitação pelo valor acima especificado.
-            </p>
-          </div>
-
-          <div class="footer">
-            <div class="date-location">
-              ${dataFormatada}.
-            </div>
-
-            <div class="signature-section">
-              <div class="signature-block">
-                <div class="signature-line">
-                  <div class="signature-name">${client.name}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.write(content);
-    printWindow.document.close();
-    printWindow.print();
-  };
-
-  if (!isOpen) return null;
 
   const activeProjects = projects.filter(p => p.is_active);
   const inactiveProjects = projects.filter(p => !p.is_active);
