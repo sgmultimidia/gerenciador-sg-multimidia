@@ -2184,6 +2184,97 @@ app.get("/api/cash-balance", async (c) => {
   }
 });
 
+
+// ==================== OPENPIX / PIX ====================
+
+// POST - Generate Pix charge via OpenPix
+app.post("/api/pix/charge", async (c) => {
+  try {
+    const { amount, client_name, client_email, correlation_id, comment } = await c.req.json();
+    const apiKey = (c.env as any).OPENPIX_API_KEY;
+
+    if (!apiKey) {
+      return c.json({ error: "OpenPix não configurado. Adicione OPENPIX_API_KEY nas variáveis de ambiente." }, 503);
+    }
+
+    const response = await fetch("https://api.openpix.com.br/api/v1/charge", {
+      method: "POST",
+      headers: {
+        "Authorization": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        correlationID: correlation_id || `sg-${Date.now()}`,
+        value: Math.round(amount * 100), // OpenPix uses cents
+        comment: comment || "Pagamento SG Multimídia",
+        customer: {
+          name: client_name,
+          email: client_email || undefined,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      return c.json({ error: "Erro ao gerar cobrança Pix", details: err }, 500);
+    }
+
+    const data = await response.json();
+    return c.json({
+      charge_id: data.charge?.identifier,
+      qr_code: data.charge?.qrCodeImage,
+      qr_code_text: data.charge?.brCode,
+      pix_link: data.charge?.paymentLinkUrl,
+      expires_at: data.charge?.expiresIn,
+    });
+  } catch (error) {
+    return c.json({ error: "Falha ao conectar com OpenPix" }, 500);
+  }
+});
+
+// POST - OpenPix webhook (payment confirmation)
+app.post("/api/pix/webhook", async (c) => {
+  try {
+    const body = await c.req.json();
+    const event = body.event;
+
+    if (event === "OPENPIX:CHARGE_COMPLETED") {
+      const charge = body.charge;
+      const correlationID = charge?.correlationID || "";
+
+      // If correlation ID starts with "quote-", auto-register in cash
+      if (correlationID.startsWith("quote-")) {
+        const quoteId = correlationID.replace("quote-", "");
+        const quote = await c.env.DB.prepare(
+          "SELECT q.*, c.name as client_name FROM quotes q JOIN clients c ON q.client_id = c.id WHERE q.id = ?"
+        ).bind(quoteId).first() as any;
+
+        if (quote) {
+          await c.env.DB.prepare(
+            "INSERT INTO cash_transactions (type, amount, description, category, client_id, transaction_date) VALUES (?, ?, ?, ?, ?, date('now'))"
+          ).bind(
+            'income',
+            charge.value / 100,
+            `Pix - ${quote.client_name} - Orçamento #${quote.quote_number}`,
+            'Pagamento via Pix',
+            quote.client_id
+          ).run();
+        }
+      }
+    }
+
+    return c.json({ success: true });
+  } catch {
+    return c.json({ error: "Webhook error" }, 500);
+  }
+});
+
+// GET - Check OpenPix configuration status
+app.get("/api/pix/status", async (c) => {
+  const apiKey = (c.env as any).OPENPIX_API_KEY;
+  return c.json({ configured: !!apiKey });
+});
+
 // ==================== METAS FINANCEIRAS ====================
 
 app.get("/api/goals", async (c) => {
