@@ -34,6 +34,7 @@ import Transmissions from '@/react-app/components/Transmissions';
 import GlobalSearch from '@/react-app/components/GlobalSearch';
 import ArchiveModal from '@/react-app/components/ArchiveModal';
 import GoalsModal from '@/react-app/components/GoalsModal';
+import PixChargeModal from '@/react-app/components/PixChargeModal';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
 
 export default function HomeNew() {
@@ -61,6 +62,8 @@ export default function HomeNew() {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
+  const [showPixCharge, setShowPixCharge] = useState(false);
+  const [pixChargeData, setPixChargeData] = useState<{ amount: number; clientName: string; clientEmail?: string; correlationId?: string; description?: string } | null>(null);
   const [showMonthlyReceipt, setShowMonthlyReceipt] = useState(false);
   const [showWithdrawalControl, setShowWithdrawalControl] = useState(false);
   const [showQuoteWizard, setShowQuoteWizard] = useState(false);
@@ -1258,6 +1261,16 @@ export default function HomeNew() {
           }
         }}
         onReceipt={() => {}}
+        onPix={(quote, client) => {
+          setPixChargeData({
+            amount: quote.total,
+            clientName: client.name,
+            clientEmail: client.email,
+            correlationId: `quote-${quote.id}`,
+            description: `Orçamento #${quote.quote_number}`,
+          });
+          setShowPixCharge(true);
+        }}
         onContract={() => {
           toast.info('Funcionalidade de contrato será implementada em breve');
         }}
@@ -1290,7 +1303,16 @@ export default function HomeNew() {
           contract={selectedContract}
         />
       )}
-<GoalsModal
+<PixChargeModal
+        isOpen={showPixCharge}
+        onClose={() => { setShowPixCharge(false); setPixChargeData(null); }}
+        amount={pixChargeData?.amount || 0}
+        clientName={pixChargeData?.clientName || ''}
+        clientEmail={pixChargeData?.clientEmail}
+        correlationId={pixChargeData?.correlationId}
+        description={pixChargeData?.description}
+      />
+      <GoalsModal
         isOpen={showGoals}
         onClose={() => setShowGoals(false)}
       />
