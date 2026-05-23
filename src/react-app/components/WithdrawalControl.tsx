@@ -1,8 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Component, type ReactNode } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, Settings, X } from 'lucide-react';
 import { useToast } from './ToastContainer';
 
-export default function WithdrawalControl() {
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { error: error?.message || 'Erro desconhecido' };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <p className="text-red-400 font-bold text-sm">Erro no componente:</p>
+          <p className="text-red-300 text-xs mt-1">{this.state.error}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function WithdrawalControlInner() {
   const toast = useToast();
 
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
@@ -330,5 +352,13 @@ export default function WithdrawalControl() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function WithdrawalControl() {
+  return (
+    <ErrorBoundary>
+      <WithdrawalControlInner />
+    </ErrorBoundary>
   );
 }
