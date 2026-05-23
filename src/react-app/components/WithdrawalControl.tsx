@@ -1,7 +1,6 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, Plus, Trash2, Settings, X } from 'lucide-react';
-import { useToast } from './ToastContainer';
-
+import { DollarSign, TrendingDown, Plus, Trash2, Settings, X } from 'lucide-react';
+import { useToast } from '@/react-app/components/ToastContainer';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: string | null }> {
   constructor(props: any) {
@@ -15,7 +14,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: string |
     if (this.state.error) {
       return (
         <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-red-400 font-bold text-sm">Erro no componente:</p>
+          <p className="text-red-400 font-bold text-sm">Erro:</p>
           <p className="text-red-300 text-xs mt-1">{this.state.error}</p>
         </div>
       );
@@ -48,30 +47,17 @@ function WithdrawalControlInner() {
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [settingsRes, revenueRes, withdrawnRes, withdrawalsRes] = await Promise.all([
+      const [s, r, w, wl] = await Promise.all([
         fetch('/api/withdrawals/settings'),
-        fetch(`/api/withdrawals/monthly-revenue/${currentMonth}`),
-        fetch(`/api/withdrawals/monthly-total/${currentMonth}`),
-        fetch(`/api/withdrawals?month=${currentMonth}`),
+        fetch('/api/withdrawals/monthly-revenue/' + currentMonth),
+        fetch('/api/withdrawals/monthly-total/' + currentMonth),
+        fetch('/api/withdrawals?month=' + currentMonth),
       ]);
-
-      if (settingsRes.ok) {
-        const s = await settingsRes.json();
-        setSettings(s);
-        setNewPercentage(String(s.percentage || 20));
-      }
-      if (revenueRes.ok) {
-        const r = await revenueRes.json();
-        setMonthlyRevenue(Number(r.revenue) || 0);
-      }
-      if (withdrawnRes.ok) {
-        const w = await withdrawnRes.json();
-        setMonthlyWithdrawn(Number(w.total) || 0);
-      }
-      if (withdrawalsRes.ok) {
-        setWithdrawals(await withdrawalsRes.json());
-      }
-    } catch {
+      if (s.ok) { const d = await s.json(); setSettings(d); setNewPercentage(String(d.percentage || 20)); }
+      if (r.ok) { const d = await r.json(); setMonthlyRevenue(Number(d.revenue) || 0); }
+      if (w.ok) { const d = await w.json(); setMonthlyWithdrawn(Number(d.total) || 0); }
+      if (wl.ok) { setWithdrawals(await wl.json()); }
+    } catch (e) {
       toast.error('Erro ao carregar dados');
     } finally {
       setLoading(false);
@@ -87,22 +73,27 @@ function WithdrawalControlInner() {
         body: JSON.stringify({ percentage: parseFloat(newPercentage) }),
       });
       if (!res.ok) throw new Error();
-      const updated = await res.json();
-      setSettings(updated);
+      const d = await res.json();
+      setSettings(d);
       setShowSettings(false);
       toast.success('Configurações salvas!');
     } catch {
-      toast.error('Erro ao salvar configurações');
+      toast.error('Erro ao salvar');
     } finally {
       setSaving(false);
     }
   };
 
+  const DAS_MEI = 75;
+  const reservePercentage = settings?.percentage || 20;
+  const reserveAmount = (monthlyRevenue * reservePercentage) / 100;
+  const recommendedAmount = Math.max(0, monthlyRevenue - DAS_MEI - reserveAmount);
+  const availableAmount = Math.max(0, recommendedAmount - monthlyWithdrawn);
+  const fmt = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
   const createWithdrawal = async () => {
     const amount = parseFloat(newAmount);
     if (isNaN(amount) || amount <= 0) { toast.warning('Valor inválido'); return; }
-    if (amount > availableAmount) { toast.warning('Valor maior que o disponível'); return; }
-
     setSaving(true);
     try {
       const res = await fetch('/api/withdrawals', {
@@ -116,9 +107,7 @@ function WithdrawalControlInner() {
         }),
       });
       if (!res.ok) throw new Error();
-      setNewAmount('');
-      setNewNotes('');
-      setShowNewWithdrawal(false);
+      setNewAmount(''); setNewNotes(''); setShowNewWithdrawal(false);
       toast.success('Retirada registrada!');
       await loadAll();
     } catch {
@@ -131,25 +120,17 @@ function WithdrawalControlInner() {
   const deleteWithdrawal = async (id: number) => {
     if (!window.confirm('Excluir esta retirada?')) return;
     try {
-      const res = await fetch(`/api/withdrawals/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await fetch('/api/withdrawals/' + id, { method: 'DELETE' });
       toast.success('Retirada excluída');
       await loadAll();
     } catch {
-      toast.error('Erro ao excluir retirada');
+      toast.error('Erro ao excluir');
     }
   };
 
-  const DAS_MEI = 75.00;
-  const reservePercentage = settings?.percentage || 20;
-  const reserveAmount = (monthlyRevenue * reservePercentage) / 100;
-  const recommendedAmount = Math.max(0, monthlyRevenue - DAS_MEI - reserveAmount);
-  const availableAmount = Math.max(0, recommendedAmount - monthlyWithdrawn);
-  const fmt = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
       </div>
     );
@@ -157,7 +138,6 @@ function WithdrawalControlInner() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">Controle de Retiradas (MEI)</h2>
@@ -168,63 +148,42 @@ function WithdrawalControlInner() {
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
         >
           <Settings className="w-3.5 h-3.5" />
-          <span>Config</span>
+          Config
         </button>
       </div>
 
-      {/* Breakdown Card */}
       <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 space-y-2">
         <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Cálculo do Mês</p>
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-300">Faturamento bruto</span>
-            <span className="text-white font-semibold">R$ {fmt(monthlyRevenue)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-300">(-) DAS MEI</span>
-            <span className="text-red-400 font-semibold">- R$ {fmt(DAS_MEI)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-300">(-) Reserva ({reservePercentage}%)</span>
-            <span className="text-yellow-400 font-semibold">- R$ {fmt(reserveAmount)}</span>
-          </div>
-          <div className="h-px bg-slate-600" />
-          <div className="flex justify-between text-sm">
-            <span className="text-green-300 font-semibold">Disponível para retirada</span>
-            <span className="text-green-400 font-bold">R$ {fmt(recommendedAmount)}</span>
-          </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-300">Faturamento bruto</span>
+          <span className="text-white font-semibold">R$ {fmt(monthlyRevenue)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-300">(-) DAS MEI</span>
+          <span className="text-red-400 font-semibold">- R$ {fmt(DAS_MEI)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-300">(-) Reserva ({reservePercentage}%)</span>
+          <span className="text-yellow-400 font-semibold">- R$ {fmt(reserveAmount)}</span>
+        </div>
+        <div className="h-px bg-slate-600" />
+        <div className="flex justify-between text-sm">
+          <span className="text-green-300 font-semibold">Disponível para retirada</span>
+          <span className="text-green-400 font-bold">R$ {fmt(recommendedAmount)}</span>
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3 text-white">
-          <div className="flex items-start justify-between mb-1">
-            <span className="text-xs opacity-90">Ainda disponível</span>
-            <DollarSign className="w-3 h-3" />
-          </div>
+          <p className="text-xs opacity-90 mb-1">Ainda disponível</p>
           <p className="text-base font-bold">R$ {fmt(availableAmount)}</p>
         </div>
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3 text-white">
-          <div className="flex items-start justify-between mb-1">
-            <span className="text-xs opacity-90">Já retirado</span>
-            <TrendingDown className="w-3 h-3" />
-          </div>
+          <p className="text-xs opacity-90 mb-1">Já retirado</p>
           <p className="text-base font-bold">R$ {fmt(monthlyWithdrawn)}</p>
-          <p className="text-xs opacity-75">
-            {monthlyRevenue > 0 ? ((monthlyWithdrawn / monthlyRevenue) * 100).toFixed(1) : 0}%
-          </p>
         </div>
       </div>
 
-      {/* Warning */}
-      {availableAmount <= 0 && monthlyWithdrawn > 0 && (
-        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-sm text-red-300 font-semibold">⚠️ Limite de retirada atingido este mês</p>
-        </div>
-      )}
-
-      {/* New Withdrawal Button */}
       <button
         onClick={() => setShowNewWithdrawal(true)}
         className="flex items-center gap-1.5 px-4 py-2 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
@@ -233,10 +192,9 @@ function WithdrawalControlInner() {
         Nova Retirada
       </button>
 
-      {/* History */}
       <div className="bg-slate-800 rounded-lg border border-slate-700">
         <div className="px-4 py-3 border-b border-slate-700">
-          <h3 className="text-white font-semibold text-sm">Histórico</h3>
+          <h3 className="text-white font-semibold text-sm">Histórico do Mês</h3>
         </div>
         {withdrawals.length === 0 ? (
           <div className="p-8 text-center text-slate-500">
@@ -245,19 +203,16 @@ function WithdrawalControlInner() {
           </div>
         ) : (
           <div className="divide-y divide-slate-700">
-            {withdrawals.map((w) => (
+            {withdrawals.map((w: any) => (
               <div key={w.id} className="px-4 py-3 flex items-center justify-between">
                 <div>
                   <p className="text-white font-semibold text-sm">R$ {fmt(Number(w.amount))}</p>
                   <p className="text-slate-400 text-xs">
                     {new Date(w.withdrawal_date + 'T12:00:00').toLocaleDateString('pt-BR')}
-                    {w.notes && ` — ${w.notes}`}
+                    {w.notes ? ' — ' + w.notes : ''}
                   </p>
                 </div>
-                <button
-                  onClick={() => deleteWithdrawal(w.id)}
-                  className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                >
+                <button onClick={() => deleteWithdrawal(w.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -266,7 +221,6 @@ function WithdrawalControlInner() {
         )}
       </div>
 
-      {/* New Withdrawal Modal */}
       {showNewWithdrawal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[80] p-4">
           <div className="bg-slate-800 rounded-xl w-full max-w-sm border border-blue-500/30 shadow-2xl">
@@ -278,34 +232,19 @@ function WithdrawalControlInner() {
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-slate-300 text-sm font-semibold mb-1">
-                  Valor (R$) * <span className="text-slate-500 font-normal">máx. R$ {fmt(availableAmount)}</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={newAmount}
-                  onChange={(e) => setNewAmount(e.target.value)}
-                  placeholder="0,00"
-                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <label className="block text-slate-300 text-sm font-semibold mb-1">Valor (R$) *</label>
+                <input type="number" step="0.01" value={newAmount} onChange={e => setNewAmount(e.target.value)}
+                  placeholder="0,00" className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
                 <label className="block text-slate-300 text-sm font-semibold mb-1">Observação (opcional)</label>
-                <input
-                  type="text"
-                  value={newNotes}
-                  onChange={(e) => setNewNotes(e.target.value)}
-                  placeholder="Ex: Pagamento de conta pessoal"
-                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <input type="text" value={newNotes} onChange={e => setNewNotes(e.target.value)}
+                  placeholder="Ex: Conta pessoal" className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setShowNewWithdrawal(false)} className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all">
-                  Cancelar
-                </button>
+                <button onClick={() => setShowNewWithdrawal(false)} className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold">Cancelar</button>
                 <button onClick={createWithdrawal} disabled={saving || !newAmount}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg font-semibold transition-all">
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-semibold">
                   {saving ? 'Salvando...' : 'Registrar'}
                 </button>
               </div>
@@ -314,7 +253,6 @@ function WithdrawalControlInner() {
         </div>
       )}
 
-      {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[80] p-4">
           <div className="bg-slate-800 rounded-xl w-full max-w-sm border border-slate-600 shadow-2xl">
@@ -327,23 +265,14 @@ function WithdrawalControlInner() {
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-slate-300 text-sm font-semibold mb-1">Percentual de Reserva (%)</label>
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  max="100"
-                  value={newPercentage}
-                  onChange={(e) => setNewPercentage(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-slate-500 text-xs mt-1">Percentual do faturamento reservado para emergências. Recomendado: 20%</p>
+                <input type="number" step="1" min="0" max="100" value={newPercentage} onChange={e => setNewPercentage(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <p className="text-slate-500 text-xs mt-1">Recomendado: 20%</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setShowSettings(false)} className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-all">
-                  Cancelar
-                </button>
+                <button onClick={() => setShowSettings(false)} className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold">Cancelar</button>
                 <button onClick={saveSettings} disabled={saving}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg font-semibold transition-all">
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg font-semibold">
                   {saving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
