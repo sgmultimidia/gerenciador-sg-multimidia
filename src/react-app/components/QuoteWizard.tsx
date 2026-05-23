@@ -144,7 +144,8 @@ export default function QuoteWizard({
     const name = serviceName.toLowerCase();
     return name.includes('transmissão ao vivo') || 
            name.includes('gravação de vídeo') || 
-           name.includes('captação de vídeo');
+           name.includes('captação de vídeo') ||
+           name.includes('sonorização');
   };
 
   const addComboToCart = (combo: Service) => {
