@@ -473,12 +473,12 @@ export default function QuoteWizard({
                                   }
                                   placeholder="Distância (km)"
                                   className="w-full px-2 py-1.5 text-xs rounded bg-slate-600 text-white border border-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder-slate-400"
-                                />
-                                {serviceDisplacements[service.service_id] && parseFloat(serviceDisplacements[service.service_id]) > 0 && (
+                               />
+                                {(serviceDisplacements[service.service_id] && parseFloat(serviceDisplacements[service.service_id]) > 0) ? (
                                   <p className="text-xs text-orange-400 mt-1">
-                                    + R$ {(parseFloat(serviceDisplacements[service.service_id]) * 1.5).toFixed(2)} em deslocamento
+                                    {`+ R$ ${(parseFloat(serviceDisplacements[service.service_id]) * 1.5).toFixed(2)} em deslocamento`}
                                   </p>
-                                )}
+                                ) : null}
                               )}
                             </div>
                           </div>
