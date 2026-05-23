@@ -495,17 +495,17 @@ export default function QuoteWizard({
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-1 min-w-0 overflow-hidden">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <h5 className="text-white font-semibold text-sm line-clamp-2">{combo.name}</h5>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h5 className="text-white font-semibold text-sm line-clamp-1 flex-1 min-w-0">{combo.name}</h5>
                                 <span className="text-xs px-1.5 py-0.5 rounded bg-purple-600 text-white font-semibold flex-shrink-0">
                                   PACOTE
                                 </span>
                               </div>
                               {combo.combo_items && (
-                                <p className="text-slate-300 text-xs truncate">{combo.combo_items}</p>
+                                <p className="text-slate-300 text-xs line-clamp-1 break-words">{combo.combo_items}</p>
                               )}
                               {combo.description && (
-                                <p className="text-slate-400 text-xs mt-0.5 truncate">{combo.description}</p>
+                                <p className="text-slate-400 text-xs mt-0.5 line-clamp-1 hidden sm:block">{combo.description}</p>
                               )}
                               <p className="text-purple-400 font-bold text-base mt-1">
                                 R$ {combo.price.toFixed(2)}
