@@ -122,13 +122,20 @@ export default function ClientActionsModal({
 
   const handleDeleteClient = async () => {
     if (!client) return;
-    await onDeleteClient(client.id);
-    onClose();
+    try {
+      await onDeleteClient(client.id);
+      onClose();
+    } catch {
+      // error handled by parent
+    }
   };
 
   const handleToggleFavorite = async () => {
-    if (client) {
+    if (!client) return;
+    try {
       await onToggleFavorite(client);
+    } catch {
+      // error handled by parent
     }
   };
 
