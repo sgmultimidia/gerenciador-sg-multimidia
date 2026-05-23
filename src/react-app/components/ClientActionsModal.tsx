@@ -20,6 +20,7 @@ interface ClientActionsModalProps {
   onQuoteReceipt?: (quote: any, client: Client) => void;
   onQuoteContract?: (quote: any, client: Client) => void;
   onQuotePix?: (quote: any, client: Client) => void;
+  onQuotePix?: (quote: any, client: Client) => void;
   onMonthlyReceiptPDF?: (receipt: MonthlyReceipt, client: Client) => void;
 }
 
@@ -41,7 +42,8 @@ export default function ClientActionsModal({
   onQuotePDF,
   onQuoteReceipt,
   onQuoteContract,
-  onMonthlyReceiptPDF
+  onMonthlyReceiptPDF,
+  onQuotePix
 }: ClientActionsModalProps) {
   useLockBodyScroll(isOpen);
   
@@ -454,6 +456,7 @@ export default function ClientActionsModal({
         onPDF={onQuotePDF}
         onReceipt={onQuoteReceipt}
         onContract={onQuoteContract}
+        onPix={onQuotePix}
         onPix={onQuotePix}
       />
     </>
