@@ -113,15 +113,27 @@ export default function QuoteWizard({
       newItem.name = `${serviceName} (${quantity} hora${quantity > 1 ? 's' : ''})`;
     }
 
-    // Add displacement and change to "externo" if applicable
+    // Add "Externo" label if has displacement
     if (displacement && displacement > 0) {
       newItem.name = `${newItem.name} - Externo`;
-      newItem.price = price + displacement;
     } else if (requiresDisplacement(service.name)) {
       newItem.name = `${newItem.name} - Interno`;
     }
 
-    setCartItems([...cartItems, newItem]);
+    const newItems = [...cartItems, newItem];
+
+    // Add displacement as separate item
+    if (displacement && displacement > 0) {
+      const kmValue = displacement * 1.5;
+      newItems.push({
+        id: `displacement-${Date.now()}`,
+        name: `Deslocamento — ${displacement} km (ida e volta)`,
+        price: kmValue,
+        type: 'service',
+      });
+    }
+
+    setCartItems(newItems);
     // Clear quantity after adding
     const newQuantities = { ...serviceQuantities };
     delete newQuantities[service.service_id];
@@ -459,9 +471,14 @@ export default function QuoteWizard({
                                       [service.service_id]: e.target.value,
                                     })
                                   }
-                                  placeholder="Deslocamento"
+                                  placeholder="Distância (km)"
                                   className="w-full px-2 py-1.5 text-xs rounded bg-slate-600 text-white border border-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 placeholder-slate-400"
                                 />
+                                {serviceDisplacements[service.service_id] && parseFloat(serviceDisplacements[service.service_id]) > 0 && (
+                                  <p className="text-xs text-orange-400 mt-1">
+                                    + R$ {(parseFloat(serviceDisplacements[service.service_id]) * 1.5).toFixed(2)} em deslocamento
+                                  </p>
+                                )}
                               )}
                             </div>
                           </div>
