@@ -22,6 +22,7 @@ interface ClientListModalProps {
   onQuoteReceipt?: (quote: any, client: Client) => void;
   onQuoteContract?: (quote: any, client: Client) => void;
   onMonthlyReceiptPDF?: (receipt: MonthlyReceipt, client: Client) => void;
+  onQuotePix?: (quote: any, client: Client) => void;
 }
 
 export default function ClientListModal({
@@ -38,7 +39,8 @@ export default function ClientListModal({
   onQuotePDF,
   onQuoteReceipt,
   onQuoteContract,
-  onMonthlyReceiptPDF
+  onMonthlyReceiptPDF,
+  onQuotePix
 }: ClientListModalProps) {
   useLockBodyScroll(isOpen);
   
@@ -298,6 +300,7 @@ export default function ClientListModal({
         onQuoteReceipt={onQuoteReceipt}
         onQuoteContract={onQuoteContract}
         onMonthlyReceiptPDF={onMonthlyReceiptPDF}
+        onQuotePix={onQuotePix}
       />
 
       <EditClientModal
