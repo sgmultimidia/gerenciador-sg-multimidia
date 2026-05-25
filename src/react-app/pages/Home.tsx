@@ -653,6 +653,15 @@ export default function HomeNew() {
               <span className="text-sm font-medium text-white">Projetos Recorrentes</span>
               <RefreshCw className="w-4 h-4 text-slate-400 group-hover:text-purple-400" />
             </motion.button>
+            <motion.button
+              onClick={() => setShowProduction(true)}
+              className="w-full px-4 py-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg text-left transition-all border border-slate-600/50 hover:border-orange-500/50 flex items-center justify-between group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={tapScale}
+            >
+              <span className="text-sm font-medium text-white">Produção Audiovisual</span>
+              <Clapperboard className="w-4 h-4 text-slate-400 group-hover:text-orange-400" />
+            </motion.button>
           </div>
         </motion.div>
 
@@ -731,15 +740,7 @@ export default function HomeNew() {
               <span className="text-sm font-medium text-white">Metas Financeiras</span>
               <Target className="w-4 h-4 text-slate-400 group-hover:text-yellow-400" />
             </motion.button>
-            <motion.button
-              onClick={() => setShowProduction(true)}
-              className="w-full px-4 py-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg text-left transition-all border border-slate-600/50 hover:border-orange-500/50 flex items-center justify-between group"
-              whileHover={{ scale: 1.01 }}
-              whileTap={tapScale}
-            >
-              <span className="text-sm font-medium text-white">Produção Audiovisual</span>
-              <Clapperboard className="w-4 h-4 text-slate-400 group-hover:text-orange-400" />
-            </motion.button>
+
           </div>
         </motion.div>
       </div>
