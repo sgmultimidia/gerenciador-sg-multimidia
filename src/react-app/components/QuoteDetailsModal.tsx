@@ -1,4 +1,4 @@
-import { X, CheckCircle, Send, Download, Receipt, FileText, Trash2, FileCheck, Calendar } from 'lucide-react';
+import { X, CheckCircle, Send, Download, Receipt, FileText, Trash2, FileCheck, Calendar, QrCode } from 'lucide-react';
 import type { Client, Quote, Receipt as ReceiptType } from '@/shared/types';
 import { useLockBodyScroll } from '@/react-app/hooks/useLockBodyScroll';
 import { formatBRL } from '@/react-app/utils/formatBRL';
@@ -15,8 +15,8 @@ interface QuoteDetailsModalProps {
   onPDF?: (quote: Quote, client: Client) => void;
   onReceipt?: (quote: Quote, client: Client) => void;
   onContract?: (quote: Quote, client: Client) => void;
-  onPix?: (quote: Quote, client: Client) => void;
   onShowReceipts?: (quote: Quote, receipts: ReceiptType[]) => void;
+  onPix?: (quote: Quote, client: Client) => void;
 }
 
 export default function QuoteDetailsModal({
@@ -31,8 +31,8 @@ export default function QuoteDetailsModal({
   onPDF,
   onReceipt,
   onContract,
-  onPix,
-  onShowReceipts
+  onShowReceipts,
+  onPix
 }: QuoteDetailsModalProps) {
   useLockBodyScroll(isOpen);
   
@@ -187,7 +187,7 @@ export default function QuoteDetailsModal({
               </button>
             )}
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {onWhatsApp && (
                 <button
                   onClick={() => onWhatsApp(quote, client)}
@@ -227,17 +227,9 @@ export default function QuoteDetailsModal({
               )}
               {onPix && (
                 <button
-                  onClick={() => {
-                    if (quote.status === 'approved') {
-                      onPix(quote, client);
-                    }
-                  }}
+                  onClick={() => { if (quote.status === 'approved') { onPix(quote, client); } }}
                   disabled={quote.status !== 'approved'}
-                  className={`px-4 py-3 ${
-                    quote.status === 'approved'
-                      ? 'bg-teal-600 hover:bg-teal-700 shadow-lg hover:shadow-teal-500/50'
-                      : 'bg-gray-600 cursor-not-allowed opacity-50'
-                  } text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2`}
+                  className={`px-4 py-3 ${quote.status === 'approved' ? 'bg-teal-600 hover:bg-teal-700 shadow-lg hover:shadow-teal-500/50' : 'bg-gray-600 cursor-not-allowed opacity-50'} text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2`}
                   title={quote.status === 'approved' ? 'Cobrar via Pix' : 'Disponível apenas para orçamentos aprovados'}
                 >
                   <QrCode className="w-5 h-5" />
