@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, DollarSign, Calendar, 
-  FileText, FolderKanban, Plus, Settings, RefreshCw, Search, FolderOpen, X, Target
+  FileText, FolderKanban, Plus, Settings, RefreshCw, Search, FolderOpen, X, Target, Clapperboard
 } from 'lucide-react';
 import type { Client, Service } from '@/shared/types';
 import { useToast } from '@/react-app/components/ToastContainer';
@@ -34,6 +34,7 @@ import Transmissions from '@/react-app/components/Transmissions';
 import GlobalSearch from '@/react-app/components/GlobalSearch';
 import ArchiveModal from '@/react-app/components/ArchiveModal';
 import GoalsModal from '@/react-app/components/GoalsModal';
+import ProductionModal from '@/react-app/components/ProductionModal';
 import PixChargeModal from '@/react-app/components/PixChargeModal';
 import { generateQuotePDF } from '@/react-app/utils/pdfGenerator';
 
@@ -62,6 +63,7 @@ export default function HomeNew() {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showGoals, setShowGoals] = useState(false);
+  const [showProduction, setShowProduction] = useState(false);
   const [showPixCharge, setShowPixCharge] = useState(false);
   const [pixChargeData, setPixChargeData] = useState<{ amount: number; clientName: string; clientEmail?: string; correlationId?: string; description?: string } | null>(null);
   const [showMonthlyReceipt, setShowMonthlyReceipt] = useState(false);
@@ -729,6 +731,15 @@ export default function HomeNew() {
               <span className="text-sm font-medium text-white">Metas Financeiras</span>
               <Target className="w-4 h-4 text-slate-400 group-hover:text-yellow-400" />
             </motion.button>
+            <motion.button
+              onClick={() => setShowProduction(true)}
+              className="w-full px-4 py-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg text-left transition-all border border-slate-600/50 hover:border-orange-500/50 flex items-center justify-between group"
+              whileHover={{ scale: 1.01 }}
+              whileTap={tapScale}
+            >
+              <span className="text-sm font-medium text-white">Produção Audiovisual</span>
+              <Clapperboard className="w-4 h-4 text-slate-400 group-hover:text-orange-400" />
+            </motion.button>
           </div>
         </motion.div>
       </div>
@@ -1321,6 +1332,11 @@ export default function HomeNew() {
         clientEmail={pixChargeData?.clientEmail}
         correlationId={pixChargeData?.correlationId}
         description={pixChargeData?.description}
+      />
+      <ProductionModal
+        isOpen={showProduction}
+        onClose={() => setShowProduction(false)}
+        clients={clients}
       />
       <GoalsModal
         isOpen={showGoals}

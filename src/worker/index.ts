@@ -2275,6 +2275,104 @@ app.get("/api/pix/status", async (c) => {
   return c.json({ configured: !!apiKey });
 });
 
+
+// ==================== PRODUÇÃO AUDIOVISUAL ====================
+
+app.get("/api/production-projects", async (c) => {
+  try {
+    const result = await c.env.DB.prepare(
+      "SELECT p.*, c.name as client_name FROM production_projects p LEFT JOIN clients c ON p.client_id = c.id ORDER BY p.updated_at DESC"
+    ).all();
+    return c.json(result.results || []);
+  } catch {
+    return c.json({ error: "Failed to fetch production projects" }, 500);
+  }
+});
+
+app.post("/api/production-projects", async (c) => {
+  try {
+    const { client_id, service_type, title, notes, deadline } = await c.req.json();
+    const result = await c.env.DB.prepare(
+      "INSERT INTO production_projects (client_id, service_type, title, current_step, status, notes, deadline) VALUES (?, ?, ?, 0, 'active', ?, ?) RETURNING *"
+    ).bind(client_id || null, service_type, title, notes || null, deadline || null).first();
+    return c.json(result);
+  } catch {
+    return c.json({ error: "Failed to create production project" }, 500);
+  }
+});
+
+app.put("/api/production-projects/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const { title, current_step, status, notes, deadline } = await c.req.json();
+    const result = await c.env.DB.prepare(
+      "UPDATE production_projects SET title=?, current_step=?, status=?, notes=?, deadline=?, updated_at=datetime('now') WHERE id=? RETURNING *"
+    ).bind(title, current_step, status, notes || null, deadline || null, id).first();
+    return c.json(result);
+  } catch {
+    return c.json({ error: "Failed to update production project" }, 500);
+  }
+});
+
+app.delete("/api/production-projects/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    await c.env.DB.prepare("DELETE FROM production_projects WHERE id=?").bind(id).run();
+    return c.json({ success: true });
+  } catch {
+    return c.json({ error: "Failed to delete production project" }, 500);
+  }
+});
+
+
+// ==================== PRODUÇÃO AUDIOVISUAL ====================
+
+app.get("/api/production", async (c) => {
+  try {
+    const result = await c.env.DB.prepare(
+      "SELECT p.*, c.name as client_name FROM production_projects p LEFT JOIN clients c ON p.client_id = c.id WHERE p.status = 'active' ORDER BY p.created_at DESC"
+    ).all();
+    return c.json(result.results || []);
+  } catch {
+    return c.json({ error: "Failed to fetch production projects" }, 500);
+  }
+});
+
+app.post("/api/production", async (c) => {
+  try {
+    const { client_id, service_type, title, notes, deadline } = await c.req.json();
+    const result = await c.env.DB.prepare(
+      "INSERT INTO production_projects (client_id, service_type, title, current_step, status, notes, deadline) VALUES (?, ?, ?, 0, 'active', ?, ?) RETURNING *"
+    ).bind(client_id || null, service_type, title, notes || null, deadline || null).first();
+    return c.json(result);
+  } catch {
+    return c.json({ error: "Failed to create production project" }, 500);
+  }
+});
+
+app.put("/api/production/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const { current_step, status, notes, deadline, title } = await c.req.json();
+    const result = await c.env.DB.prepare(
+      "UPDATE production_projects SET current_step=?, status=?, notes=?, deadline=?, title=?, updated_at=datetime('now') WHERE id=? RETURNING *"
+    ).bind(current_step, status || 'active', notes || null, deadline || null, title, id).first();
+    return c.json(result);
+  } catch {
+    return c.json({ error: "Failed to update production project" }, 500);
+  }
+});
+
+app.delete("/api/production/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    await c.env.DB.prepare("DELETE FROM production_projects WHERE id=?").bind(id).run();
+    return c.json({ success: true });
+  } catch {
+    return c.json({ error: "Failed to delete production project" }, 500);
+  }
+});
+
 // ==================== METAS FINANCEIRAS ====================
 
 app.get("/api/goals", async (c) => {
