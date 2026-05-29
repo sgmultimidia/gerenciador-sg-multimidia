@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "SG Multimídia",
-  "short_name": "SG Multimídia",
+  "short_name": "SG",
   "description": "Estúdio de produção audiovisual - Sistema de gestão",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
@@ -27,5 +29,9 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["business", "productivity"]
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "prefer_related_applications": false
 }
