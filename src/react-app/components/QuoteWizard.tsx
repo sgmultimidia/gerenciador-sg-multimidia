@@ -49,6 +49,30 @@ export default function QuoteWizard({
   // Service quantity states
   const [serviceQuantities, setServiceQuantities] = useState<Record<string, number>>({});
   const [serviceDisplacements, setServiceDisplacements] = useState<Record<string, string>>({});
+  const [serviceHours, setServiceHours] = useState<Record<string, string>>({});
+
+  // Converte "1:30" → 1.5 horas
+  const parseHHMM = (value: string): number => {
+    const parts = value.trim().split(':');
+    if (parts.length === 2) {
+      const h = parseInt(parts[0]) || 0;
+      const m = Math.min(59, parseInt(parts[1]) || 0);
+      return h + m / 60;
+    }
+    return parseFloat(value) || 0;
+  };
+
+  // Formata para exibição: "1:30" → "1h30min"
+  const formatHoursLabel = (value: string): string => {
+    const parts = value.trim().split(':');
+    if (parts.length === 2) {
+      const h = parseInt(parts[0]) || 0;
+      const m = parseInt(parts[1]) || 0;
+      if (m === 0) return `${h}h`;
+      return `${h}h${String(m).padStart(2, '0')}min`;
+    }
+    return `${parseFloat(value) || 0}h`;
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -72,6 +96,7 @@ export default function QuoteWizard({
     setNotes('');
     setServiceQuantities({});
     setServiceDisplacements({});
+    setServiceHours({});
   };
 
   const filteredClients = clients.filter(client =>
@@ -81,37 +106,52 @@ export default function QuoteWizard({
   );
 
   const addServiceToCart = (service: Service, displacement?: number) => {
-    const quantity = serviceQuantities[service.service_id];
-    if (!quantity || quantity < 1) {
-      toast.warning('Informe a quantidade antes de adicionar');
-      return;
-    }
-    
-    const price = service.price * quantity;
-    
-    // Normalize service name - replace "Captação de vídeo" with "Gravação de vídeos"
+    // Normalize service name
     let serviceName = service.name;
     if (serviceName.toLowerCase().includes('captação de vídeo')) {
       serviceName = serviceName.replace(/captação de vídeo/i, 'Gravação de vídeos');
     }
-    
+
+    let price = 0;
+    let itemLabel = serviceName;
+
+    if (service.is_hourly) {
+      // Serviço por hora: usa campo HH:MM
+      const timeValue = serviceHours[service.service_id];
+      if (!timeValue) {
+        toast.warning('Informe a duração (HH:MM) antes de adicionar');
+        return;
+      }
+      const hours = parseHHMM(timeValue);
+      if (hours <= 0) {
+        toast.warning('Duração inválida. Use o formato HH:MM (ex: 1:30)');
+        return;
+      }
+      price = service.price * hours;
+      itemLabel = `${serviceName} (${formatHoursLabel(timeValue)})`;
+    } else {
+      // Serviço por quantidade
+      const quantity = serviceQuantities[service.service_id];
+      if (!quantity || quantity < 1) {
+        toast.warning('Informe a quantidade antes de adicionar');
+        return;
+      }
+      price = service.price * quantity;
+      if (service.is_per_track) {
+        itemLabel = `${serviceName} (${quantity} faixa${quantity > 1 ? 's' : ''})`;
+      } else if (service.is_per_video) {
+        itemLabel = `${serviceName} (${quantity} vídeo${quantity > 1 ? 's' : ''})`;
+      } else if (service.is_per_image) {
+        itemLabel = `${serviceName} (${quantity} ${quantity > 1 ? 'imagens' : 'imagem'})`;
+      }
+    }
+
     const newItem: QuoteItem = {
       id: `${service.service_id}-${Date.now()}`,
-      name: serviceName,
+      name: itemLabel,
       price: price,
       type: 'service',
     };
-
-    // Add quantity info to name if applicable
-    if (service.is_per_track) {
-      newItem.name = `${serviceName} (${quantity} faixa${quantity > 1 ? 's' : ''})`;
-    } else if (service.is_per_video) {
-      newItem.name = `${serviceName} (${quantity} vídeo${quantity > 1 ? 's' : ''})`;
-    } else if (service.is_per_image) {
-      newItem.name = `${serviceName} (${quantity} ${quantity > 1 ? 'imagens' : 'imagem'})`;
-    } else if (service.is_hourly) {
-      newItem.name = `${serviceName} (${quantity} hora${quantity > 1 ? 's' : ''})`;
-    }
 
     // Add "Externo" label if has displacement
     if (displacement && displacement > 0) {
@@ -133,10 +173,13 @@ export default function QuoteWizard({
     }
 
     setCartItems(newItems);
-    // Clear quantity after adding
+    // Limpa campo após adicionar
     const newQuantities = { ...serviceQuantities };
     delete newQuantities[service.service_id];
     setServiceQuantities(newQuantities);
+    const newHours = { ...serviceHours };
+    delete newHours[service.service_id];
+    setServiceHours(newHours);
     toast.success('Adicionado ao orçamento!');
   };
 
@@ -430,27 +473,46 @@ export default function QuoteWizard({
                             </div>
                             <div className="flex flex-col gap-1.5 items-end flex-shrink-0">
                               <div className="flex items-center gap-1.5">
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={serviceQuantities[service.service_id] !== undefined ? serviceQuantities[service.service_id] : ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val === '') {
-                                      const newQuantities = { ...serviceQuantities };
-                                      delete newQuantities[service.service_id];
-                                      setServiceQuantities(newQuantities);
-                                    } else {
-                                      const parsed = parseInt(val);
-                                      setServiceQuantities({
-                                        ...serviceQuantities,
-                                        [service.service_id]: isNaN(parsed) ? 0 : parsed,
-                                      });
-                                    }
-                                  }}
-                                  placeholder="Qtd"
-                                  className="w-16 px-2 py-1.5 text-sm text-center rounded bg-slate-600 text-white border border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                />
+                                {service.is_hourly ? (
+                                  <div className="flex flex-col items-center gap-0.5">
+                                    <input
+                                      type="text"
+                                      value={serviceHours[service.service_id] || ''}
+                                      onChange={(e) => setServiceHours({ ...serviceHours, [service.service_id]: e.target.value })}
+                                      onBlur={(e) => {
+                                        const v = e.target.value.trim();
+                                        if (v && !v.includes(':')) {
+                                          setServiceHours({ ...serviceHours, [service.service_id]: `${v}:00` });
+                                        }
+                                      }}
+                                      placeholder="HH:MM"
+                                      className="w-20 px-2 py-1.5 text-sm text-center rounded bg-slate-600 text-white border border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-slate-400"
+                                    />
+                                    <span className="text-xs text-slate-400">ex: 1:30</span>
+                                  </div>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={serviceQuantities[service.service_id] !== undefined ? serviceQuantities[service.service_id] : ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (val === '') {
+                                        const newQuantities = { ...serviceQuantities };
+                                        delete newQuantities[service.service_id];
+                                        setServiceQuantities(newQuantities);
+                                      } else {
+                                        const parsed = parseInt(val);
+                                        setServiceQuantities({
+                                          ...serviceQuantities,
+                                          [service.service_id]: isNaN(parsed) ? 0 : parsed,
+                                        });
+                                      }
+                                    }}
+                                    placeholder="Qtd"
+                                    className="w-16 px-2 py-1.5 text-sm text-center rounded bg-slate-600 text-white border border-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                )}
                                 <button
                                   onClick={() => addServiceToCart(service, needsDisplacement ? parseFloat(serviceDisplacements[service.service_id] || '0') : undefined)}
                                   className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold transition-all flex items-center gap-1.5"
